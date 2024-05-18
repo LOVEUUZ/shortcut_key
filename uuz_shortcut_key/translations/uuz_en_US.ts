@@ -12,220 +12,209 @@
         <translation type="vanished">sadsafdafgsd</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="28"/>
+        <location filename="../mainwindow.cpp" line="31"/>
         <source>快捷启动</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="86"/>
-        <source>error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="86"/>
-        <source>Unable to create/open the default configuration file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="101"/>
-        <source>default_config_json parse Exception</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="102"/>
-        <source>The default file encountered an exception and will be deleted and recreated</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="106"/>
-        <location filename="../mainwindow.cpp" line="194"/>
-        <location filename="../mainwindow.cpp" line="430"/>
-        <location filename="../mainwindow.cpp" line="432"/>
+        <location filename="../mainwindow.cpp" line="120"/>
+        <location filename="../mainwindow.cpp" line="134"/>
+        <location filename="../mainwindow.cpp" line="232"/>
+        <location filename="../mainwindow.cpp" line="487"/>
         <source>Fail</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="107"/>
-        <source>Creation failed, exit!</source>
+        <location filename="../mainwindow.cpp" line="120"/>
+        <source>open default error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="115"/>
+        <location filename="../mainwindow.cpp" line="152"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="118"/>
+        <location filename="../mainwindow.cpp" line="155"/>
         <source>&amp;Open File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="121"/>
+        <location filename="../mainwindow.cpp" line="158"/>
         <source>&amp;New File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="124"/>
+        <location filename="../mainwindow.cpp" line="161"/>
         <source>&amp;Import File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="129"/>
+        <location filename="../mainwindow.cpp" line="166"/>
         <source>&amp;Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="156"/>
-        <location filename="../mainwindow.cpp" line="190"/>
+        <location filename="../mainwindow.cpp" line="193"/>
+        <location filename="../mainwindow.cpp" line="227"/>
         <source>Quick start-Currently in use: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="178"/>
+        <location filename="../mainwindow.cpp" line="215"/>
         <source>input</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="178"/>
+        <location filename="../mainwindow.cpp" line="215"/>
         <source>Please enter the configuration file name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="183"/>
+        <location filename="../mainwindow.cpp" line="220"/>
         <source>warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="183"/>
+        <location filename="../mainwindow.cpp" line="220"/>
         <source>The file already exists, please re -enter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="194"/>
+        <location filename="../mainwindow.cpp" line="232"/>
         <source>File creation failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="226"/>
+        <location filename="../mainwindow.cpp" line="267"/>
         <source>save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="227"/>
+        <location filename="../mainwindow.cpp" line="268"/>
         <source>Set to default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="269"/>
-        <location filename="../mainwindow.cpp" line="406"/>
+        <location filename="../mainwindow.cpp" line="328"/>
+        <location filename="../mainwindow.cpp" line="465"/>
         <source>Please enter the name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="272"/>
-        <location filename="../mainwindow.cpp" line="409"/>
+        <location filename="../mainwindow.cpp" line="331"/>
+        <location filename="../mainwindow.cpp" line="468"/>
         <source>Press trigger</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="273"/>
-        <location filename="../mainwindow.cpp" line="410"/>
+        <location filename="../mainwindow.cpp" line="332"/>
+        <location filename="../mainwindow.cpp" line="469"/>
         <source>Double-click to choose</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="353"/>
+        <location filename="../mainwindow.cpp" line="415"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="353"/>
+        <location filename="../mainwindow.cpp" line="415"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>Ctrl</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="353"/>
+        <location filename="../mainwindow.cpp" line="415"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>Alt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="353"/>
+        <location filename="../mainwindow.cpp" line="415"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>shortcut_key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="353"/>
+        <location filename="../mainwindow.cpp" line="415"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="294"/>
-        <location filename="../mainwindow.cpp" line="357"/>
+        <location filename="../mainwindow.cpp" line="353"/>
+        <location filename="../mainwindow.cpp" line="415"/>
+        <location filename="../mainwindow.cpp" line="516"/>
         <source>desc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="295"/>
-        <location filename="../mainwindow.cpp" line="358"/>
+        <location filename="../mainwindow.cpp" line="354"/>
+        <location filename="../mainwindow.cpp" line="416"/>
+        <location filename="../mainwindow.cpp" line="517"/>
         <source>trigger</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="296"/>
-        <location filename="../mainwindow.cpp" line="359"/>
+        <location filename="../mainwindow.cpp" line="355"/>
+        <location filename="../mainwindow.cpp" line="417"/>
+        <location filename="../mainwindow.cpp" line="518"/>
         <source>enable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="296"/>
-        <location filename="../mainwindow.cpp" line="359"/>
+        <location filename="../mainwindow.cpp" line="355"/>
+        <location filename="../mainwindow.cpp" line="417"/>
+        <location filename="../mainwindow.cpp" line="518"/>
         <source>delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="304"/>
+        <location filename="../mainwindow.cpp" line="363"/>
         <source>open file error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="320"/>
+        <location filename="../mainwindow.cpp" line="379"/>
         <source>Configuration file parse Exception</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="345"/>
+        <location filename="../mainwindow.cpp" line="404"/>
         <source>save success</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="348"/>
+        <location filename="../mainwindow.cpp" line="407"/>
         <source>write error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="348"/>
+        <location filename="../mainwindow.cpp" line="407"/>
         <source>Error writing configuration file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="393"/>
+        <location filename="../mainwindow.cpp" line="452"/>
         <source>read success</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="430"/>
-        <location filename="../mainwindow.cpp" line="433"/>
-        <source>Set default config Fail,because: </source>
+        <location filename="../mainwindow.cpp" line="488"/>
+        <source>fstream exception</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="433"/>
-        <source>updateDefaultConfigFile exception</source>
+        <location filename="../mainwindow.cpp" line="134"/>
+        <location filename="../mainwindow.cpp" line="488"/>
+        <source>Set default config Fail,because: </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -238,18 +227,29 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>My_dialog_accept_filePath</name>
     <message>
-        <location filename="../i18n.hpp" line="16"/>
-        <source>Fail because</source>
+        <location filename="../my_dialog_accept_filepath.cpp" line="24"/>
+        <location filename="../my_dialog_accept_filepath.cpp" line="28"/>
+        <source>请填入正确文件路径</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>i18n</name>
+    <name>Trigger</name>
     <message>
-        <location filename="../i18n.hpp" line="14"/>
-        <source>Fail</source>
+        <location filename="../Trigger.hpp" line="17"/>
+        <source>once_click</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Trigger.hpp" line="18"/>
+        <source>double_click</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Trigger.hpp" line="19"/>
+        <source>triple_click</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

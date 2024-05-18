@@ -52,9 +52,6 @@
     <ClCompile Include="substyleditemdelegate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tmp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -74,7 +71,7 @@
     <QtMoc Include="substyleditemdelegate.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="tmp.h">
+    <QtMoc Include="Trigger.hpp">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

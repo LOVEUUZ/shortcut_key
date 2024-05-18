@@ -47,7 +47,5 @@ class MainWindow : public QMainWindow {
     void           updateModel(const nlohmann::json &) const;
     void           addViewNewRow() const;
     void           updateDefaultConfigFile();
+    void           clearModel() const;
 };
-
-
-

@@ -95,7 +95,6 @@
     <ClCompile Include="my_dialog_accept_filepath.cpp" />
     <ClCompile Include="my_lineedit_exe_path.cpp" />
     <ClCompile Include="substyleditemdelegate.cpp" />
-    <ClCompile Include="tmp.cpp" />
     <QtRcc Include="mainwindow.qrc" />
     <QtUic Include="mainwindow.ui" />
     <QtMoc Include="mainwindow.h" />
@@ -118,7 +117,7 @@
   <ItemGroup>
     <ClInclude Include="json.hpp" />
     <ClInclude Include="MyLineEdit .hpp" />
-    <QtMoc Include="tmp.h" />
+    <QtMoc Include="Trigger.hpp" />
     <QtMoc Include="substyleditemdelegate.h" />
     <QtMoc Include="my_dialog_accept_filepath.h" />
   </ItemGroup>

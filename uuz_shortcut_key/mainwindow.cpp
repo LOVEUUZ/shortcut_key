@@ -13,12 +13,15 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QDesktopServices>
+#include <Windows.h>
 
 #include "json.hpp"
 #include "substyleditemdelegate.h"
 
 using json = nlohmann::json;
 
+extern HANDLE hMutex;
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
   ui.setupUi(this);
@@ -37,7 +40,13 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
   initContext();
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow() {
+  // 在程序退出时释放互斥体
+  if (hMutex) {
+    ReleaseMutex(hMutex);
+    CloseHandle(hMutex);
+  }
+}
 
 //键盘按下事件
 void MainWindow::keyPressEvent(QKeyEvent* event) {
@@ -97,7 +106,7 @@ void MainWindow::initDefaultConfigFile() {
     jsonObject[0]["shortcut_key"] = "";
     jsonObject[0]["path"]         = "double click";
     jsonObject[0]["desc"]         = "desc";
-    jsonObject[0]["trigger"]      = 0;
+    jsonObject[0]["trigger"]      = 1;
     jsonObject[0]["enable"]       = false;
     if (ofs) {
       ofs << std::setw(4) << jsonObject << "\n";
@@ -216,6 +225,7 @@ void MainWindow::initMenu() {
           os.close();
           currentFilePath = ABFileName; //指定当前主页面选定配置
           setWindowTitle(tr("Quick start-Currently in use: ") + text);
+          clearModel();
           initContext();
         }
         else {
@@ -234,13 +244,14 @@ void MainWindow::initMenu() {
 
 void MainWindow::initConnect() {}
 
-
 void MainWindow::initTableView() {
   table_view = new QTableView(this);
   // table_view->horizontalHeader()->setSectionsMovable(true); //列可拖动（拖动会导致拖动后新读取的数据还是按照默认的顺序填入，暂时放弃）
   //设置代理
   delegate_ = new SubStyledItemDelegate(this);
   table_view->setItemDelegate(delegate_);
+  // 设置列宽自适应
+  table_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 void MainWindow::initView() {
@@ -261,6 +272,24 @@ void MainWindow::initView() {
   h_btns_box_layout->addWidget(btn_jian);
   h_btns_box_layout->addWidget(btn_save);
   h_btns_box_layout->addWidget(btn_set_default);
+
+  //测试按钮
+#ifdef _DEBUG
+  QPushButton* btn_test = new QPushButton("test", this);
+  h_btns_box_layout->addWidget(btn_test);
+  connect(btn_test, &QPushButton::clicked, this, [&]() {
+    QModelIndex index      = model_->index(0, 4); // 获取指定行的索引
+    QVariant    itemData   = model_->data(index); // 获取数据
+    QString     itemString = itemData.toString(); // 将数据转换为字符串
+    qDebug() << "path: " << itemString;
+    // QProcess* process = new QProcess(this);
+    // process->start(itemString);
+    QString filePath = QDir::toNativeSeparators(itemString); // 转为本地格式，避免中文路径无法启动
+    QUrl    fileUrl  = QUrl::fromLocalFile(filePath);        //转为url方便启动
+    QDesktopServices::openUrl(fileUrl);                      //使用该函数可以打开exe，也能打开jpg，txt等文件，更适用这里
+  });
+#endif
+
   layout->addLayout(h_btns_box_layout, 9, 6, 1, 4);
 
   ui.centralWidget->setLayout(layout);
@@ -321,7 +350,7 @@ void MainWindow::initContext() const {
 void MainWindow::initModel() {
   model_ = new QStandardItemModel();
   model_->setRowCount(1);
-  model_->setColumnCount(8);
+  model_->setColumnCount(9);
   model_->setHorizontalHeaderLabels(
     QStringList() << tr("name") << tr("Ctrl") << tr("Alt") << tr("shortcut_key") << tr("path") << tr("desc") <<
     tr("trigger") <<
@@ -357,6 +386,7 @@ json MainWindow::analyzeJson() const {
 void MainWindow::savaConfigJson() const {
   //构建json
   json jsonObject;
+
 
   for (int i = 0; i < model_->rowCount(); ++i) {
     // 添加数据到 JSON 对象
@@ -479,4 +509,14 @@ void MainWindow::updateDefaultConfigFile() {
   ofs_tmp_update_default_config_json.close();
   default_config_json = json_;
   QMessageBox::information(this, "Success", "Operation completed successfully.");
+}
+
+void MainWindow::clearModel() const {
+  model_->clear();
+  model_->setRowCount(1);
+  model_->setColumnCount(9);
+  model_->setHorizontalHeaderLabels(
+    QStringList() << tr("name") << tr("Ctrl") << tr("Alt") << tr("shortcut_key") << tr("path") << tr("desc") <<
+    tr("trigger") <<
+    tr("enable") << tr("delete"));
 }

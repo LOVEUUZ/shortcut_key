@@ -4,14 +4,17 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QCheckBox>
 #include <QMouseEvent>
+#include <QComboBox>
+#include <QPainter>
 
 #include "mainwindow.h"
 #include "my_dialog_accept_filepath.h"
+#include "Trigger.hpp"
 
 // 声明全局变量
 extern MainWindow* globalVar;
+extern Trigger*    ptr_trigger;
 
 SubStyledItemDelegate::SubStyledItemDelegate(QObject* parent): QStyledItemDelegate(parent) {
   connect(this, qOverload<QWidget*, QAbstractItemDelegate::EndEditHint>(&QAbstractItemDelegate::closeEditor),
@@ -37,6 +40,31 @@ QWidget* SubStyledItemDelegate::createEditor(QWidget*            parent, const Q
     // editor->exec();      //记住不能用exec，会提示是外部的窗口调用的提交数据信号，造成直接关闭编辑器
     return editor;
   }
+
+  //触发次数列
+  if (index.column() == 6) {
+    QComboBox* comboBox = new QComboBox(parent);
+    comboBox->addItem(ptr_trigger->str_once_click, ptr_trigger->strToType(ptr_trigger->str_once_click));
+    comboBox->addItem(ptr_trigger->str_double_click, ptr_trigger->strToType(ptr_trigger->str_double_click));
+    comboBox->addItem(ptr_trigger->str_triple_click, ptr_trigger->strToType(ptr_trigger->str_triple_click));
+
+    //该函数被const修饰，无法发送信号commitData和closeEditor 所以要const_cast解开
+    connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), const_cast<SubStyledItemDelegate*>(this),
+            [&](int type) {
+              QWidget* editor = qobject_cast<QWidget*>(sender());
+              emit const_cast<SubStyledItemDelegate*>(this)->commitData(editor);
+              emit const_cast<SubStyledItemDelegate*>(this)->closeEditor(editor, QAbstractItemDelegate::NoHint);
+            });
+
+    return comboBox;
+  }
+
+  //最后一列放一个 删除 操作按钮
+  if (index.column() == index.model()->columnCount() - 1) {
+    return nullptr;
+  }
+
+
   return QStyledItemDelegate::createEditor(parent, option, index);
 }
 
@@ -66,6 +94,11 @@ void SubStyledItemDelegate::setEditorData(QWidget* editor, const QModelIndex & i
   if (multilineEditor)
     multilineEditor->my_lineEdit_exe_path_->setText(value);
 
+  //触发次数列
+  if (QComboBox* combo_box = qobject_cast<QComboBox*>(editor)) {
+    combo_box->setCurrentIndex(index.data().toInt() - 1);
+  }
+
   QStyledItemDelegate::setEditorData(editor, index);
 }
 
@@ -84,6 +117,17 @@ void SubStyledItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* mo
     return;
   }
 
+  // 触发次数列
+  if (index.column() == 6) {
+    QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
+    if (comboBox) {
+      QString selectedText = comboBox->currentText();
+      int     triggerType  = ptr_trigger->strToType(selectedText);
+      qDebug() << "Selected trigger type:" << triggerType << ", text:" << selectedText;
+      model->setData(index, triggerType, Qt::EditRole);
+      return;
+    }
+  }
 
   QStyledItemDelegate::setModelData(editor, model, index);
 }
@@ -137,7 +181,29 @@ void SubStyledItemDelegate::paint(QPainter*           painter, const QStyleOptio
     // }
     // // 使用 QApplication 的样式来绘制标签页
     // QApplication::style()->drawControl(QStyle::CE_TabBarTab, &tabOption, painter);
+    return;
+  }
 
+  //最后一列放一个 删除 操作按钮
+  if (index.column() == index.model()->columnCount() - 1) {
+    // 设置按钮的绘制区域，带有边距
+    QStyleOptionButton buttonOption;
+    buttonOption.rect  = option.rect.adjusted(5, 5, -5, -5);
+    buttonOption.text  = "Delete";
+    buttonOption.state = QStyle::State_Enabled;
+
+    QPushButton button;
+    button.setStyle(option.widget->style());
+    button.style()->drawControl(QStyle::CE_PushButton, &buttonOption, painter, &button);
+    return;
+  }
+
+
+  if (index.column() == 6) {
+    // 获取单元格的值
+    QString stringValue = ptr_trigger->triggerToString(static_cast<Trigger::TriggerType>(index.data().toInt()));
+    // 绘制文本
+    painter->drawText(option.rect, Qt::AlignCenter, stringValue);
     return;
   }
 
@@ -149,8 +215,8 @@ bool SubStyledItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model
                                         const QModelIndex & index) {
   qDebug() << "编辑器事件";
 
-  QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
   if (index.data().typeId() == QMetaType::Bool) {
+    QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
     if (mouseEvent) {
       if (event->type() == QEvent::MouseButtonPress && option.rect.contains(mouseEvent->pos())) {
         bool data = model->data(index, Qt::DisplayRole).toBool();
@@ -163,6 +229,19 @@ bool SubStyledItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model
     }
   }
 
+  //最后一行的删除按钮的事件
+  if (event->type() == QEvent::MouseButtonPress) {
+    QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+    if (index.column() == index.model()->columnCount() - 1) {
+      // 设置按钮的点击区域，带有边距
+      int   margin     = 5;
+      QRect buttonRect = option.rect.adjusted(margin, margin, -margin, -margin);
+      if (buttonRect.contains(mouseEvent->pos())) {
+        model->removeRow(index.row());
+        return true;
+      }
+    }
+  }
 
   return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
