@@ -15,13 +15,13 @@
 #include <QInputDialog>
 
 #include "json.hpp"
+#include "substyleditemdelegate.h"
 
 using json = nlohmann::json;
 
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
   ui.setupUi(this);
-
   // My_lineEdit_exe_path* m = new My_lineEdit_exe_path(this);
   // MyLineEdit* m = new MyLineEdit(this);
 
@@ -77,8 +77,8 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
 }
 
 void MainWindow::initDefaultConfigFile() {
-  default_config_file_json = QCoreApplication::applicationDirPath().toStdString() + "/config/default.json";
-  currentFilePath          = QCoreApplication::applicationDirPath().toStdString() + "/config/default_config_file.json";
+  default_config_file_json = QCoreApplication::applicationDirPath().toStdString() + str_default_txt_path;
+  currentFilePath          = QCoreApplication::applicationDirPath().toStdString() + str_default_config_json_path;
 
   uintmax_t file_size;
   if (!std::filesystem::exists(default_config_file_json)) {
@@ -87,6 +87,22 @@ void MainWindow::initDefaultConfigFile() {
     default_config_json["default_config_file_path"] = currentFilePath;
     ofs_default_config_file << std::setw(4) << default_config_json << "\n";
     ofs_default_config_file.close();
+
+    std::ofstream ofs(currentFilePath, std::ios::trunc);
+    //构建json
+    json jsonObject;
+    jsonObject[0]["name"]         = "1";
+    jsonObject[0]["Ctrl"]         = false;
+    jsonObject[0]["Alt"]          = false;
+    jsonObject[0]["shortcut_key"] = "";
+    jsonObject[0]["path"]         = "double click";
+    jsonObject[0]["desc"]         = "desc";
+    jsonObject[0]["trigger"]      = 0;
+    jsonObject[0]["enable"]       = false;
+    if (ofs) {
+      ofs << std::setw(4) << jsonObject << "\n";
+      ofs.close();
+    }
   }
   file_size = std::filesystem::file_size(default_config_file_json);
 
@@ -218,9 +234,13 @@ void MainWindow::initMenu() {
 
 void MainWindow::initConnect() {}
 
+
 void MainWindow::initTableView() {
   table_view = new QTableView(this);
   // table_view->horizontalHeader()->setSectionsMovable(true); //列可拖动（拖动会导致拖动后新读取的数据还是按照默认的顺序填入，暂时放弃）
+  //设置代理
+  delegate_ = new SubStyledItemDelegate(this);
+  table_view->setItemDelegate(delegate_);
 }
 
 void MainWindow::initView() {
@@ -250,7 +270,7 @@ void MainWindow::initView() {
   connect(btn_set_default, &QPushButton::clicked, this, &MainWindow::updateDefaultConfigFile);
 }
 
-void MainWindow::initContext() {
+void MainWindow::initContext() const {
   if (currentFilePath.empty()) return;
   //如果正在编辑的配置文件处于空文件则直接开始准备数据
   if (!std::filesystem::exists(currentFilePath)) {
@@ -307,7 +327,6 @@ void MainWindow::initModel() {
     tr("trigger") <<
     tr("enable") << tr("delete"));
 
-
   table_view->setModel(model_);
 }
 
@@ -362,7 +381,7 @@ void MainWindow::savaConfigJson() const {
   }
 }
 
-void MainWindow::updateModel(const nlohmann::json & json_) {
+void MainWindow::updateModel(const nlohmann::json & json_) const {
   model_->clear();
 
   model_->setHorizontalHeaderLabels(
@@ -384,11 +403,12 @@ void MainWindow::updateModel(const nlohmann::json & json_) {
     QStandardItem* item_trigger_enum    = new QStandardItem();
     QStandardItem* item_enable_bool     = new QStandardItem();
 
+
     item_name_string->setData(QString::fromStdString(json_[i]["name"].get<std::string>()), Qt::DisplayRole);
     item_ctrl_bool->setData(json_[i]["Ctrl"].get<bool>(), Qt::DisplayRole);
     item_alt_bool->setData(json_[i]["Alt"].get<bool>(), Qt::DisplayRole);
     item_shortcut_key->setData(QString::fromStdString(json_[i]["shortcut_key"].get<std::string>()), Qt::ToolTipRole);
-    item_path_string->setData(QString::fromStdString(json_[i]["path"].get<std::string>()), Qt::ToolTipRole);
+    item_path_string->setData(QString::fromStdString(json_[i]["path"].get<std::string>()), Qt::DisplayRole);
     item_describe_string->setData(QString::fromStdString(json_[i]["desc"].get<std::string>()), Qt::DisplayRole);
     item_trigger_enum->setData(json_[i]["trigger"].get<int>(), Qt::DisplayRole);
     item_enable_bool->setData(json_[i]["enable"].get<bool>(), Qt::DisplayRole);
@@ -405,8 +425,7 @@ void MainWindow::updateModel(const nlohmann::json & json_) {
   statusBar->showMessage(tr("read success"));
 }
 
-
-void MainWindow::addViewNewRow() {
+void MainWindow::addViewNewRow() const {
   QStandardItem* item_name_string  = new QStandardItem();
   QStandardItem* item_ctrl_bool    = new QStandardItem();
   QStandardItem* item_alt_bool     = new QStandardItem();

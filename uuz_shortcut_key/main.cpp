@@ -31,6 +31,9 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
+// 声明全局变量
+MainWindow* globalVar;
+
 int main(int argc, char* argv[]) {
   // // 设置键盘钩子
   // HHOOK hHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);
@@ -52,8 +55,10 @@ int main(int argc, char* argv[]) {
   //
   // return 0;
 
+
   QApplication a(argc, argv);
   MainWindow   w;
+  globalVar = &w;
   w.show();
 
   return a.exec();

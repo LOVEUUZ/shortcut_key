@@ -20,22 +20,21 @@ void My_lineEdit_exe_path::dragEnterEvent(QDragEnterEvent* event) {
 
 //拖放操作完成，数据被放置在窗口部件上时被调用
 void My_lineEdit_exe_path::dropEvent(QDropEvent* event) {
-    const QMimeData* mimeData = event->mimeData();
-    if (mimeData->hasUrls()) {
-        QList<QUrl> urlList = mimeData->urls();
-        if (urlList.size() == 1) {
-            // 获取文件的路径并显示在LineEdit中
-            QString filePath = urlList.first().toLocalFile();
-            // 设置文本
-            QLineEdit::setText(filePath);
-        }
-        event->acceptProposedAction();
+  const QMimeData* mimeData = event->mimeData();
+  if (mimeData->hasUrls()) {
+    QList<QUrl> urlList = mimeData->urls();
+    if (urlList.size() == 1) {
+      // 获取文件的路径并显示在LineEdit中
+      QString filePath = urlList.first().toLocalFile();
+      // 设置文本
+      QLineEdit::setText(filePath);
     }
-    else {
-        event->ignore();
-    }
+    event->acceptProposedAction();
+  }
+  else {
+    event->ignore();
+  }
 
-    // 不能调用父类的dropEvent方法
-    // QLineEdit::dropEvent(event);
+  // 不能调用父类的dropEvent方法
+  // QLineEdit::dropEvent(event);
 }
-

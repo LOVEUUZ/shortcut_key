@@ -46,6 +46,15 @@
     <ClCompile Include="my_lineedit_exe_path.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="my_dialog_accept_filepath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="substyleditemdelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,6 +66,15 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="my_lineedit_exe_path.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="my_dialog_accept_filepath.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="substyleditemdelegate.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="tmp.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
