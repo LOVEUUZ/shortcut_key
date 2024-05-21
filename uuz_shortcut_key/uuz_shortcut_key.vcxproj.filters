@@ -21,6 +21,24 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="Source Files\Component">
+      <UniqueIdentifier>{148f835f-3c4f-4332-8a83-216edb3e1be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Component">
+      <UniqueIdentifier>{d8c10ad7-3321-42c5-8fb1-b8354c6c2cf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\delegate">
+      <UniqueIdentifier>{79d7aebb-d0ca-4069-adde-fec58c90e5e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\delegate">
+      <UniqueIdentifier>{579549fc-ede4-4ba9-9621-a1f25c03fe5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{f65128b3-440e-44b2-b83f-ddfb6c7b45d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{35c3ff02-7203-4be4-91dd-71d7dae9ade5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="mainwindow.qrc">
@@ -43,17 +61,29 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="my_lineedit_exe_path.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="my_dialog_accept_filepath.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="substyleditemdelegate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="my_lineedit_exe_path.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="my_dialog_accept_filepath.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="my_dialog_key_input.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsHookEx.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="substyleditemdelegate.cpp">
+      <Filter>Source Files\delegate</Filter>
+    </ClCompile>
+    <ClCompile Include="keyEvent.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="startQuickly.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -62,25 +92,37 @@
     </QtTranslation>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="my_lineedit_exe_path.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="my_dialog_accept_filepath.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="substyleditemdelegate.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Trigger.hpp">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="my_dialog_accept_filepath.h">
+      <Filter>Header Files\Component</Filter>
+    </QtMoc>
+    <QtMoc Include="my_lineedit_exe_path.h">
+      <Filter>Header Files\Component</Filter>
+    </QtMoc>
+    <QtMoc Include="my_dialog_key_input.h">
+      <Filter>Header Files\Component</Filter>
+    </QtMoc>
+    <QtMoc Include="my_dialog_key_input.h">
+      <Filter>Header Files\Component</Filter>
+    </QtMoc>
+    <QtMoc Include="substyleditemdelegate.h">
+      <Filter>Header Files\delegate</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MyLineEdit .hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="json.hpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsHookEx.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="keyEvent.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="startQuickly.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

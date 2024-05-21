@@ -18,6 +18,8 @@ class My_dialog_accept_filePath : public QDialog {
 
   public:
   signals:
-    void str_path_ok(const QString& text);
+    void str_path_ok();
 
+  protected:
+    void closeEvent(QCloseEvent*) override;
 };

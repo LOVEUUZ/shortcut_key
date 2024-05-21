@@ -7,10 +7,13 @@
 #include <QMouseEvent>
 #include <QComboBox>
 #include <QPainter>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "my_dialog_accept_filepath.h"
+#include "my_dialog_key_input.h"
 #include "Trigger.hpp"
+
 
 // 声明全局变量
 extern MainWindow* globalVar;
@@ -32,17 +35,26 @@ SubStyledItemDelegate::~SubStyledItemDelegate() {}
 QWidget* SubStyledItemDelegate::createEditor(QWidget*            parent, const QStyleOptionViewItem & option,
                                              const QModelIndex & index) const {
   qDebug() << "1. 创建编辑器";
-  if (index.column() == 4) {
+
+  //快捷键输入dialog
+  if (index.column() == 5) {
+    My_dialog_key_input* editor = new My_dialog_key_input(parent);
+    //当改dialog点击确定的时候发出该信号，触发提交数据
+    connect(editor, &My_dialog_key_input::editingCompleted, this, &SubStyledItemDelegate::commitAndCloseEditor);
+    return editor;
+  }
+
+  //文件输入dialpg
+  if (index.column() == 6) {
     My_dialog_accept_filePath* editor = new My_dialog_accept_filePath(parent);
 
-    connect(editor, &My_dialog_accept_filePath::str_path_ok, this,
-            &SubStyledItemDelegate::commitAndCloseEditor);
+    connect(editor, &My_dialog_accept_filePath::str_path_ok, this, &SubStyledItemDelegate::commitAndCloseEditor);
     // editor->exec();      //记住不能用exec，会提示是外部的窗口调用的提交数据信号，造成直接关闭编辑器
     return editor;
   }
 
   //触发次数列
-  if (index.column() == 6) {
+  if (index.column() == 8) {
     QComboBox* comboBox = new QComboBox(parent);
     comboBox->addItem(ptr_trigger->str_once_click, ptr_trigger->strToType(ptr_trigger->str_once_click));
     comboBox->addItem(ptr_trigger->str_double_click, ptr_trigger->strToType(ptr_trigger->str_double_click));
@@ -73,7 +85,8 @@ void SubStyledItemDelegate::updateEditorGeometry(QWidget*            editor, con
                                                  const QModelIndex & index) const {
   qDebug() << "2. 更新编辑器位置";
 
-  if (qobject_cast<My_dialog_accept_filePath*>(editor)) {
+
+  if (qobject_cast<My_dialog_accept_filePath*>(editor) || qobject_cast<My_dialog_key_input*>(editor)) {
     //获取主窗口的位置和尺寸
     QRect main_window_geometry = globalVar->geometry();
     //移动对话框到中心位置
@@ -89,10 +102,13 @@ void SubStyledItemDelegate::updateEditorGeometry(QWidget*            editor, con
 //3. 6. 通过索引从模型中获取数据
 void SubStyledItemDelegate::setEditorData(QWidget* editor, const QModelIndex & index) const {
   qDebug() << "3.6. 设置编辑器数据";
-  QString                    value           = index.model()->data(index, Qt::EditRole).toString();
-  My_dialog_accept_filePath* multilineEditor = qobject_cast<My_dialog_accept_filePath*>(editor);
-  if (multilineEditor)
-    multilineEditor->my_lineEdit_exe_path_->setText(value);
+  QString value = index.model()->data(index, Qt::EditRole).toString();
+  if (My_dialog_accept_filePath* tmp_edit = qobject_cast<My_dialog_accept_filePath*>(editor))
+    tmp_edit->my_lineEdit_exe_path_->setText(value);
+
+  if (My_dialog_key_input* tmp_edit = qobject_cast<My_dialog_key_input*>(editor)) {
+    tmp_edit->line_edit->setText(value);
+  }
 
   //触发次数列
   if (QComboBox* combo_box = qobject_cast<QComboBox*>(editor)) {
@@ -111,16 +127,29 @@ void SubStyledItemDelegate::onCommitData(QWidget* editor) {
 //5.  将编辑后的新数据返回模型
 void SubStyledItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex & index) const {
   qDebug() << "5.设置模型数据";
-  My_dialog_accept_filePath* multilineEditor = qobject_cast<My_dialog_accept_filePath*>(editor);
-  if (multilineEditor) {
+
+  //快捷键接收框
+  if (My_dialog_key_input* shortcut_key_editor = qobject_cast<My_dialog_key_input*>(editor)) {
+    std::string str_key_ = shortcut_key_editor->str_key_tmp.str();
+    QString     text     = QString::fromStdString(str_key_);
+    model->setData(index, text);
+    model->setData(index, shortcut_key_editor->shortcut_key_msg_.key_value_total, ROLE_KEY);
+
+    auto vec = shortcut_key_editor->shortcut_key_msg_;
+    // QVariant::fromValue将任何数据类型存入
+    model->setData(index, QVariant::fromValue(vec), ROLE_VEC_KEY_NUM);
+    return;
+  }
+
+  //文件路径接收框
+  if (My_dialog_accept_filePath* multilineEditor = qobject_cast<My_dialog_accept_filePath*>(editor)) {
     model->setData(index, multilineEditor->my_lineEdit_exe_path_->text(), Qt::EditRole);
     return;
   }
 
   // 触发次数列
-  if (index.column() == 6) {
-    QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
-    if (comboBox) {
+  if (index.column() == 8) {
+    if (QComboBox* comboBox = qobject_cast<QComboBox*>(editor)) {
       QString selectedText = comboBox->currentText();
       int     triggerType  = ptr_trigger->strToType(selectedText);
       qDebug() << "Selected trigger type:" << triggerType << ", text:" << selectedText;
@@ -198,8 +227,8 @@ void SubStyledItemDelegate::paint(QPainter*           painter, const QStyleOptio
     return;
   }
 
-
-  if (index.column() == 6) {
+  //下拉框将枚举转为对应的string显示
+  if (index.column() == 8) {
     // 获取单元格的值
     QString stringValue = ptr_trigger->triggerToString(static_cast<Trigger::TriggerType>(index.data().toInt()));
     // 绘制文本
@@ -237,9 +266,21 @@ bool SubStyledItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model
       int   margin     = 5;
       QRect buttonRect = option.rect.adjusted(margin, margin, -margin, -margin);
       if (buttonRect.contains(mouseEvent->pos())) {
+        if (model->rowCount() <= 1) {
+          QMessageBox::warning(nullptr, tr("Warning"), tr("Unable to delete last row"));
+          return true;
+        }
         model->removeRow(index.row());
         return true;
       }
+    }
+  }
+
+  //如果是第5列(快捷键输入)，则输入不会触发编辑器创建，而是无视(只有双击才能在次处创建编辑器)
+  if (index.column() == 5) {
+    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease || event->type() ==
+        QEvent::InputMethod) {
+      return true;
     }
   }
 
@@ -250,6 +291,6 @@ bool SubStyledItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model
 //不知道为什么，自定的编辑器失去焦点就会消失的问题重写这个函数然后直接返回false就能解决（返回true也行，只是需要点击其他地方触发文本更新）
 bool SubStyledItemDelegate::eventFilter(QObject* object, QEvent* event) {
   // qDebug() << "事件过滤器";
-
-  return false; //继续传播
+  return false;
+  // return QStyledItemDelegate::eventFilter(object, event); //继续传播
 }

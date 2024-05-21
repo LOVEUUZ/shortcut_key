@@ -14,7 +14,7 @@ My_dialog_accept_filePath::My_dialog_accept_filePath(QWidget* parent) {
   my_lineEdit_exe_path_->setFocus();
   layout->addWidget(my_lineEdit_exe_path_, 5);
   layout->addWidget(btn_ok, 1);
-  
+
 
   QObject::connect(btn_ok, &QPushButton::clicked, [&]() {
     QString     filePath     = my_lineEdit_exe_path_->text();
@@ -32,14 +32,22 @@ My_dialog_accept_filePath::My_dialog_accept_filePath(QWidget* parent) {
 
     // if (delegate == nullptr) return;
 
-    emit str_path_ok(filePath);
+    emit str_path_ok();
     close();
     return;
 
     // this->accept();
   });
-
 }
 
 
-My_dialog_accept_filePath::~My_dialog_accept_filePath() {}
+My_dialog_accept_filePath::~My_dialog_accept_filePath() {
+  qDebug() << "My_dialog_accept_filePath 析构";
+}
+
+
+void My_dialog_accept_filePath::closeEvent(QCloseEvent* event) {
+  // 安排在事件循环的安全点删除对象
+  this->deleteLater();
+  QDialog::closeEvent(event);
+}

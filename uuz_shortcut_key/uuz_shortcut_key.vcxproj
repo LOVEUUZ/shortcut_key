@@ -92,9 +92,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="keyEvent.cpp" />
     <ClCompile Include="my_dialog_accept_filepath.cpp" />
+    <ClCompile Include="my_dialog_key_input.cpp" />
     <ClCompile Include="my_lineedit_exe_path.cpp" />
+    <ClCompile Include="startQuickly.cpp" />
     <ClCompile Include="substyleditemdelegate.cpp" />
+    <ClCompile Include="WindowsHookEx.cpp" />
     <QtRcc Include="mainwindow.qrc" />
     <QtUic Include="mainwindow.ui" />
     <QtMoc Include="mainwindow.h" />
@@ -116,7 +120,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="MyLineEdit .hpp" />
+    <ClInclude Include="keyEvent.h" />
+    <ClInclude Include="startQuickly.h" />
+    <ClInclude Include="WindowsHookEx.h" />
+    <QtMoc Include="my_dialog_key_input.h" />
     <QtMoc Include="Trigger.hpp" />
     <QtMoc Include="substyleditemdelegate.h" />
     <QtMoc Include="my_dialog_accept_filepath.h" />

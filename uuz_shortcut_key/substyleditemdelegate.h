@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QStyledItemDelegate>
-
 #include "my_dialog_accept_filepath.h"
 
 class SubStyledItemDelegate : public QStyledItemDelegate {
@@ -32,9 +31,15 @@ class SubStyledItemDelegate : public QStyledItemDelegate {
     void onCloseEditor(QWidget* editor);
     void onCommitData(QWidget* editor);
 
-    void commitAndCloseEditor(const QString & text) {
+    void commitAndCloseEditor() {
       QWidget* editor = qobject_cast<QWidget*>(sender());
       emit commitData(editor);
       emit closeEditor(editor, QAbstractItemDelegate::NoHint);
     }
+
+    // void commitAndCloseEditor(const std::vector<std::string>& vec) {
+    //     QWidget* editor = qobject_cast<QWidget*>(sender());
+    //     emit commitData(editor);
+    //     emit closeEditor(editor, QAbstractItemDelegate::NoHint);
+    // }
 };

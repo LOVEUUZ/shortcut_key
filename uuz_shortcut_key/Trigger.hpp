@@ -30,11 +30,11 @@ class Trigger : public QObject {
       }
     }
 
-    int strToType(const QString& str){
-        if (str == str_once_click) return once_click;
-        if (str == str_double_click) return double_click;
-        if (str == str_triple_click) return triple_click;
-        return 0;
+    int strToType(const QString & str) {
+      if (str == str_once_click) return once_click;
+      if (str == str_double_click) return double_click;
+      if (str == str_triple_click) return triple_click;
+      return 0;
     }
 
     Trigger() {
