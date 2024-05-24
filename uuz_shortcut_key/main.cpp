@@ -4,6 +4,9 @@
 #include <filesystem>
 #include <thread>
 
+// #include <io.h>
+// #include <fcntl.h>
+
 #include "mainwindow.h"
 #include "Trigger.hpp"
 #include "startQuickly.h"
@@ -13,12 +16,16 @@
 HANDLE hMutex;
 // 主窗口全局变量
 MainWindow* globalVar;
+//当前的配置json
+nlohmann::json glob_json_;
 
 void isRepeat();
 void initDir();
 
 
 int main(int argc, char* argv[]) {
+    // SetConsoleOutputCP(CP_UTF8);
+    // _setmode(_fileno(stdout), _O_U16TEXT);
   isRepeat();
 
   QApplication a(argc, argv);

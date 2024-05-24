@@ -23,8 +23,6 @@
 
 using json = nlohmann::json;
 
-extern HANDLE hMutex;
-
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
   ui.setupUi(this);
   // My_lineEdit_exe_path* m = new My_lineEdit_exe_path(this);
@@ -203,7 +201,7 @@ void MainWindow::initMenu() {
     setWindowTitle(tr("Quick start-Currently in use: ") + filename);
     currentFilePath = filePath.toLocal8Bit().constData(); //指定当前主页面选定配置
     key_map.clear();
-    initContext();                                        //将配置文件内容填入
+    initContext(); //将配置文件内容填入
   });
 
   //新建配置文件
@@ -337,6 +335,7 @@ void MainWindow::initContext() const {
   if (file_size > 0) {
     //有内容，开始解析
     json json_ = analyzeJson();
+    glob_json_ = json_;
     if (json_ == nullptr) return;
     //根据json内容回填模型数据
     updateModel(json_);
@@ -431,31 +430,8 @@ void MainWindow::savaConfigJson() const {
 
     //下面几个用于快捷键的索引，不显示在视图中，但是要写在配置中
     int key = model_->index(i, 5).data(ROLE_KEY).toInt();
-    // ShortcutKeyMsg tmp_shortcut_key_msg;
-    // if (key_map.count(key) == 1) {
-    //   tmp_shortcut_key_msg = key_map.find(key)->second;
-    // }
-    // else if (key_map.count(key) > 1) {
-    //   auto model_vec = model_->index(i, 5).data(ROLE_VEC_KEY_NUM).value<ShortcutKeyMsg>().key_value_serial_number;
-    //   auto pair_s    = key_map.equal_range(key);
-    //   for (auto it = pair_s.first; it != pair_s.second; ++it) {
-    //     auto skm_vec = it->second.key_value_serial_number;
-    //     if (skm_vec == model_vec) {
-    //       tmp_shortcut_key_msg = it->second;
-    //       break;
-    //     }
-    //   }
-    //   if (tmp_shortcut_key_msg.key_value_total == 0) {
-    //     qDebug() << "map错误，虽然有该key的value，但对应不上";
-    //     return;
-    //   }
-    // }
-    // else {
-    //   qDebug() << "map错误，该key: " << key << " 无对应的value";
-    //   return;
-    // }
 
-    auto tmp_shortcut_key_msg = model_->index(i, 5).data(ROLE_VEC_KEY_NUM).value<ShortcutKeyMsg>();
+    ShortcutKeyMsg tmp_shortcut_key_msg = model_->index(i, 5).data(ROLE_VEC_KEY_NUM).value<ShortcutKeyMsg>();
 
     jsonObject[i]["key"]                                       = key;
     jsonObject[i]["ShortcutKeyMsg"]["key_value_total"]         = tmp_shortcut_key_msg.key_value_total;
@@ -468,6 +444,7 @@ void MainWindow::savaConfigJson() const {
     oFile << std::setw(4) << jsonObject << "\n";
     oFile.close();
     statusBar->showMessage(tr("save success"));
+    glob_json_ = jsonObject;
   }
   else {
     QMessageBox::critical(nullptr, tr("write error"), tr("Error writing configuration file"));
@@ -517,16 +494,13 @@ void MainWindow::updateModel(const nlohmann::json & json_) const {
     root->setChild(i, 8, item_trigger_enum);
     root->setChild(i, 9, item_enable_bool);
 
-    //下面这几个是不显示在视图中的内容,属于第6列，快捷键的内容
-    QStandardItem* item_key_total_int         = new QStandardItem();
-    QStandardItem* item_ShortcutKeyMsg_struct = new QStandardItem();
-    item_key_total_int->setData(json_[i]["key"].get<int>(), ROLE_KEY);
+    //下面这几个是不显示在视图中的内容,属于第6列，快捷键的内容（不需要重新创建QStandardItem，直接用之前的，否则新对象会覆盖旧对象）
+    item_shortcut_key->setData(json_[i]["key"].get<int>(), ROLE_KEY);
     ShortcutKeyMsg shortcut_key_msg;
     shortcut_key_msg.key_value_total         = json_[i]["ShortcutKeyMsg"]["key_value_total"].get<int>();
-    shortcut_key_msg.key_value_serial_number = json_[i]["ShortcutKeyMsg"]["key_value_serial_number"].get<std::vector<
-      uint32_t>>();
+    shortcut_key_msg.key_value_serial_number = json_[i]["ShortcutKeyMsg"]["key_value_serial_number"].get<std::vector<uint32_t>>();
     shortcut_key_msg.str_key_list = json_[i]["ShortcutKeyMsg"]["str_key_list"].get<std::vector<std::string>>();
-    item_ShortcutKeyMsg_struct->setData(QVariant::fromValue(shortcut_key_msg), ROLE_VEC_KEY_NUM);
+    item_shortcut_key->setData(QVariant::fromValue(shortcut_key_msg), ROLE_VEC_KEY_NUM);
 
     //同时将这些数据交给全局map提供给 StartQuickly 处理
     key_map.emplace(json_[i]["key"].get<int>(), json_[i]["ShortcutKeyMsg"].get<ShortcutKeyMsg>());

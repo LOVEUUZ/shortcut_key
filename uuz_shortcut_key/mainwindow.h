@@ -12,6 +12,9 @@
 #include "keyEvent.h"
 #include "WindowsHookEx.h"
 
+extern HANDLE         hMutex;
+extern nlohmann::json glob_json_;
+
 constexpr int ROLE_KEY = Qt::UserRole + 1;
 constexpr int ROLE_VEC_KEY_NUM = Qt::UserRole + 2;
 

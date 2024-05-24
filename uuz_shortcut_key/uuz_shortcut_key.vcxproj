@@ -98,6 +98,7 @@
     <ClCompile Include="my_lineedit_exe_path.cpp" />
     <ClCompile Include="startQuickly.cpp" />
     <ClCompile Include="substyleditemdelegate.cpp" />
+    <ClCompile Include="timedSet.cpp" />
     <ClCompile Include="WindowsHookEx.cpp" />
     <QtRcc Include="mainwindow.qrc" />
     <QtUic Include="mainwindow.ui" />
@@ -122,6 +123,7 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="keyEvent.h" />
     <ClInclude Include="startQuickly.h" />
+    <ClInclude Include="timedSet.h" />
     <ClInclude Include="WindowsHookEx.h" />
     <QtMoc Include="my_dialog_key_input.h" />
     <QtMoc Include="Trigger.hpp" />

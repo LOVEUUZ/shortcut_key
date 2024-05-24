@@ -73,9 +73,6 @@
     <ClCompile Include="my_dialog_key_input.cpp">
       <Filter>Source Files\Component</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsHookEx.cpp">
-      <Filter>Source Files\Component</Filter>
-    </ClCompile>
     <ClCompile Include="substyleditemdelegate.cpp">
       <Filter>Source Files\delegate</Filter>
     </ClCompile>
@@ -84,6 +81,12 @@
     </ClCompile>
     <ClCompile Include="startQuickly.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsHookEx.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="timedSet.cpp">
+      <Filter>Source Files\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,14 +118,17 @@
     <ClInclude Include="json.hpp">
       <Filter>Source Files\Component</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsHookEx.h">
-      <Filter>Header Files\Component</Filter>
-    </ClInclude>
     <ClInclude Include="keyEvent.h">
       <Filter>Header Files\Component</Filter>
     </ClInclude>
+    <ClInclude Include="WindowsHookEx.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
     <ClInclude Include="startQuickly.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="timedSet.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
