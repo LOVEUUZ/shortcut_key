@@ -121,10 +121,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
     <None Include="uuz_zh_CN.qm">
       <Filter>Translation Files</Filter>
     </None>
+    <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <QtTranslation Include="uuz_zh_CN.ts">

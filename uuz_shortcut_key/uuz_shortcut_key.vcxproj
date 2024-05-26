@@ -131,7 +131,7 @@
     <QtMoc Include="my_dialog_accept_filepath.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
+    <None Include="..\README.md" />
     <None Include="uuz_zh_CN.qm" />
   </ItemGroup>
   <ItemGroup>
