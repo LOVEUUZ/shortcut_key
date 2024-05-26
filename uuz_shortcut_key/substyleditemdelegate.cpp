@@ -19,36 +19,38 @@
 extern MainWindow* globalVar;
 extern Trigger*    ptr_trigger;
 
-SubStyledItemDelegate::SubStyledItemDelegate(QObject* parent): QStyledItemDelegate(parent) {
+sub_styled_item_delegate::sub_styled_item_delegate(QObject* parent): QStyledItemDelegate(parent) {
+  //绑定结束编辑和提交数据信道到自定的槽函数上(目前无用，仅作提示)
   connect(this, qOverload<QWidget*, QAbstractItemDelegate::EndEditHint>(&QAbstractItemDelegate::closeEditor),
-          this, qOverload<QWidget*>(&SubStyledItemDelegate::onCloseEditor));
+          this, qOverload<QWidget*>(&sub_styled_item_delegate::onCloseEditor));
 
   // connect(this, SIGNAL(commitData(QWidget*)), this, SLOT(onCommitData(QWidget*)));
   connect(this, qOverload<QWidget*>(&QAbstractItemDelegate::commitData), this,
-          qOverload<QWidget*>(&SubStyledItemDelegate::onCommitData));
+          qOverload<QWidget*>(&sub_styled_item_delegate::onCommitData));
 }
 
-SubStyledItemDelegate::~SubStyledItemDelegate() {}
-
+sub_styled_item_delegate::~sub_styled_item_delegate() {}
 
 //1.创建编辑器
-QWidget* SubStyledItemDelegate::createEditor(QWidget*            parent, const QStyleOptionViewItem & option,
-                                             const QModelIndex & index) const {
+QWidget* sub_styled_item_delegate::createEditor(QWidget*            parent, const QStyleOptionViewItem & option,
+                                                const QModelIndex & index) const {
+#ifdef _DEBUG
   qDebug() << "1. 创建编辑器";
+#endif
 
   //快捷键输入dialog
   if (index.column() == 5) {
-    My_dialog_key_input* editor = new My_dialog_key_input(parent);
+    my_dialog_key_input* editor = new my_dialog_key_input(parent);
     //当改dialog点击确定的时候发出该信号，触发提交数据
-    connect(editor, &My_dialog_key_input::editingCompleted, this, &SubStyledItemDelegate::commitAndCloseEditor);
+    connect(editor, &my_dialog_key_input::editingCompleted, this, &sub_styled_item_delegate::commitAndCloseEditor);
     return editor;
   }
 
   //文件输入dialpg
   if (index.column() == 6) {
-    My_dialog_accept_filePath* editor = new My_dialog_accept_filePath(parent);
+    my_dialog_accept_file_path* editor = new my_dialog_accept_file_path(parent);
 
-    connect(editor, &My_dialog_accept_filePath::str_path_ok, this, &SubStyledItemDelegate::commitAndCloseEditor);
+    connect(editor, &my_dialog_accept_file_path::str_path_ok, this, &sub_styled_item_delegate::commitAndCloseEditor);
     // editor->exec();      //记住不能用exec，会提示是外部的窗口调用的提交数据信号，造成直接关闭编辑器
     return editor;
   }
@@ -61,11 +63,11 @@ QWidget* SubStyledItemDelegate::createEditor(QWidget*            parent, const Q
     comboBox->addItem(ptr_trigger->str_triple_click, ptr_trigger->strToType(ptr_trigger->str_triple_click));
 
     //该函数被const修饰，无法发送信号commitData和closeEditor 所以要const_cast解开
-    connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), const_cast<SubStyledItemDelegate*>(this),
+    connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), const_cast<sub_styled_item_delegate*>(this),
             [&](int type) {
               QWidget* editor = qobject_cast<QWidget*>(sender());
-              emit const_cast<SubStyledItemDelegate*>(this)->commitData(editor);
-              emit const_cast<SubStyledItemDelegate*>(this)->closeEditor(editor, QAbstractItemDelegate::NoHint);
+              emit const_cast<sub_styled_item_delegate*>(this)->commitData(editor);
+              emit const_cast<sub_styled_item_delegate*>(this)->closeEditor(editor, QAbstractItemDelegate::NoHint);
             });
 
     return comboBox;
@@ -81,12 +83,13 @@ QWidget* SubStyledItemDelegate::createEditor(QWidget*            parent, const Q
 }
 
 //2.更新编辑器位置
-void SubStyledItemDelegate::updateEditorGeometry(QWidget*            editor, const QStyleOptionViewItem & option,
-                                                 const QModelIndex & index) const {
+void sub_styled_item_delegate::updateEditorGeometry(QWidget*            editor, const QStyleOptionViewItem & option,
+                                                    const QModelIndex & index) const {
+#ifdef _DEBUG
   qDebug() << "2. 更新编辑器位置";
+#endif
 
-
-  if (qobject_cast<My_dialog_accept_filePath*>(editor) || qobject_cast<My_dialog_key_input*>(editor)) {
+  if (qobject_cast<my_dialog_accept_file_path*>(editor) || qobject_cast<my_dialog_key_input*>(editor)) {
     //获取主窗口的位置和尺寸
     QRect main_window_geometry = globalVar->geometry();
     //移动对话框到中心位置
@@ -100,13 +103,16 @@ void SubStyledItemDelegate::updateEditorGeometry(QWidget*            editor, con
 }
 
 //3. 6. 通过索引从模型中获取数据
-void SubStyledItemDelegate::setEditorData(QWidget* editor, const QModelIndex & index) const {
+void sub_styled_item_delegate::setEditorData(QWidget* editor, const QModelIndex & index) const {
+#ifdef _DEBUG
   qDebug() << "3.6. 设置编辑器数据";
+#endif
+
   QString value = index.model()->data(index, Qt::EditRole).toString();
-  if (My_dialog_accept_filePath* tmp_edit = qobject_cast<My_dialog_accept_filePath*>(editor))
+  if (my_dialog_accept_file_path* tmp_edit = qobject_cast<my_dialog_accept_file_path*>(editor))
     tmp_edit->my_lineEdit_exe_path_->setText(value);
 
-  if (My_dialog_key_input* tmp_edit = qobject_cast<My_dialog_key_input*>(editor)) {
+  if (my_dialog_key_input* tmp_edit = qobject_cast<my_dialog_key_input*>(editor)) {
     tmp_edit->line_edit->setText(value);
   }
 
@@ -120,16 +126,21 @@ void SubStyledItemDelegate::setEditorData(QWidget* editor, const QModelIndex & i
 
 
 // 4.  信号 编辑器提交数据
-void SubStyledItemDelegate::onCommitData(QWidget* editor) {
+void sub_styled_item_delegate::onCommitData(QWidget* editor) {
+#ifdef _DEBUG
   qDebug() << "4.提交数据信号触发";
+#endif
 }
 
 //5.  将编辑后的新数据返回模型
-void SubStyledItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex & index) const {
+void sub_styled_item_delegate::setModelData(QWidget*            editor, QAbstractItemModel* model,
+                                            const QModelIndex & index) const {
+#ifdef _DEBUG
   qDebug() << "5.设置模型数据";
+#endif
 
   //快捷键接收框
-  if (My_dialog_key_input* shortcut_key_editor = qobject_cast<My_dialog_key_input*>(editor)) {
+  if (my_dialog_key_input* shortcut_key_editor = qobject_cast<my_dialog_key_input*>(editor)) {
     std::string str_key_ = shortcut_key_editor->str_key_tmp.str();
     QString     text     = QString::fromStdString(str_key_);
     model->setData(index, text);
@@ -142,7 +153,7 @@ void SubStyledItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* mo
   }
 
   //文件路径接收框
-  if (My_dialog_accept_filePath* multilineEditor = qobject_cast<My_dialog_accept_filePath*>(editor)) {
+  if (my_dialog_accept_file_path* multilineEditor = qobject_cast<my_dialog_accept_file_path*>(editor)) {
     model->setData(index, multilineEditor->my_lineEdit_exe_path_->text(), Qt::EditRole);
     return;
   }
@@ -162,13 +173,24 @@ void SubStyledItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* mo
 }
 
 // 7. 信号  关闭编辑器信号
-void SubStyledItemDelegate::onCloseEditor(QWidget* editor) {
+void sub_styled_item_delegate::onCloseEditor(QWidget* editor) {
+#ifdef _DEBUG
   qDebug() << "7.关闭编辑器信号触发";
+#endif
 }
 
 //让符合条件的元素自定显示方式
-void SubStyledItemDelegate::paint(QPainter*           painter, const QStyleOptionViewItem & option,
-                                  const QModelIndex & index) const {
+void sub_styled_item_delegate::paint(QPainter*           painter, const QStyleOptionViewItem & option,
+                                     const QModelIndex & index) const {
+  //下拉框将枚举转为对应的string显示
+  if (index.column() == 8) {
+    // 获取单元格的值
+    QString stringValue = ptr_trigger->triggerToString(static_cast<Trigger::TriggerType>(index.data().toInt()));
+    // 绘制文本
+    painter->drawText(option.rect, Qt::AlignCenter, stringValue);
+    return;
+  }
+
   if (index.data().typeId() == QMetaType::Bool) {
     bool data = index.data().toBool();
 
@@ -227,23 +249,17 @@ void SubStyledItemDelegate::paint(QPainter*           painter, const QStyleOptio
     return;
   }
 
-  //下拉框将枚举转为对应的string显示
-  if (index.column() == 8) {
-    // 获取单元格的值
-    QString stringValue = ptr_trigger->triggerToString(static_cast<Trigger::TriggerType>(index.data().toInt()));
-    // 绘制文本
-    painter->drawText(option.rect, Qt::AlignCenter, stringValue);
-    return;
-  }
 
   QStyledItemDelegate::paint(painter, option, index);
 }
 
 //bool类型的值走这里，不用创建编辑器就能修改值
-bool SubStyledItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem & option,
-                                        const QModelIndex & index) {
+bool sub_styled_item_delegate::editorEvent(QEvent*                      event, QAbstractItemModel* model,
+                                           const QStyleOptionViewItem & option,
+                                           const QModelIndex &          index) {
+#ifdef _DEBUG
   qDebug() << "编辑器事件";
-
+#endif
   if (index.data().typeId() == QMetaType::Bool) {
     QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
     if (mouseEvent) {
@@ -289,7 +305,7 @@ bool SubStyledItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model
 
 
 //不知道为什么，自定的编辑器失去焦点就会消失的问题重写这个函数然后直接返回false就能解决（返回true也行，只是需要点击其他地方触发文本更新）
-bool SubStyledItemDelegate::eventFilter(QObject* object, QEvent* event) {
+bool sub_styled_item_delegate::eventFilter(QObject* object, QEvent* event) {
   // qDebug() << "事件过滤器";
   return false;
   // return QStyledItemDelegate::eventFilter(object, event); //继续传播

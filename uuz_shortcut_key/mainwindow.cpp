@@ -1,48 +1,21 @@
 #include "mainwindow.h"
-#include "my_lineedit_exe_path.h"
-
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QFileDialog>
-#include <fstream>
-#include <filesystem>
-#include <iostream>
-#include <QKeyEvent>
-#include <QTableView>
-#include <QStandardItemModel>
-#include <QHeaderView>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QDesktopServices>
-#include <utility>
-#include <Windows.h>
-
-#include "json.hpp"
-#include "substyleditemdelegate.h"
-#include "WindowsHookEx.h"
 
 using json = nlohmann::json;
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
   ui.setupUi(this);
-  // My_lineEdit_exe_path* m = new My_lineEdit_exe_path(this);
-  // MyLineEdit* m = new MyLineEdit(this);
 
-  // ptr_windows_hook = WindowsHookEx::getWindowHook();
-  // ptr_windows_hook->installHook();
-  // setFunc();
-
-
-  setWindowTitle(tr("快捷启动"));
 
   initDefaultConfigFile();
-
+  initTranslate();
   initTableView();
   initModel();
   initView();
-  initConnect();
+  initTray();
   initMenu();
   initContext();
+
+  qInfo() << "启动完成";
 }
 
 MainWindow::~MainWindow() {
@@ -51,47 +24,40 @@ MainWindow::~MainWindow() {
     ReleaseMutex(hMutex);
     CloseHandle(hMutex);
   }
-  qDebug() << "主窗口退出";
+  qInfo() << "程序退出";
 }
 
-//获取按下的键盘事件
-// void MainWindow::set_key_event(const KeyEvent & key_event) {
-//   std::unique_lock<std::mutex> lock(mtx);
-//   if (queue_key_event.size() > 20) {
-//     queue_key_event.pop();
-//   }
-//   std::cout << key_event.key_name << " " << key_event.key << " " << key_event.isPressed << "\n";
-//   queue_key_event.push(key_event);
-// }
+//加载翻译文件
+void MainWindow::initTranslate() {
+  // 获取系统语言
+  QString       locale;
+  std::ifstream if_defaultConfig(default_config_file_json);
+  if (if_defaultConfig) {
+    qInfo() << "加载默认设置语言";
+    locale = QString::fromStdString(default_config_json["lang"].get<std::string>());
 
-// KeyEvent MainWindow::getKeyEvent() {
-//   KeyEvent key_event_;
-//
-//   {
-//     std::unique_lock<std::mutex> lock(mtx);
-//     if (queue_key_event.empty()) {
-//       return KeyEvent();
-//     }
-//     key_event_ = std::move(queue_key_event.front());
-//     queue_key_event.pop();
-//   }
-//
-//   return key_event_;
-// }
+    // 加载Qt自带翻译文件
+    if (qtTranslator.load("uuz_" + locale, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+      QApplication::installTranslator(&qtTranslator);
+    }
 
-// void MainWindow::setFunc() {
-//   auto func = [&](const KeyEvent & key_event) { set_key_event(key_event); };
-//   queue_clear();
-//   ptr_windows_hook->setFunc(func);
-//   //
-//   // // 使用 lambda 表达式绑定成员函数
-//   // // bool b = ptr_windows_hook->setFunc([&](KeyEvent k) {
-//   // //   std::cout << k.key_name << " " << k.key << " " << k.isPressed << "\n";
-//   // // });
-// }
+    QString translateFilePath = QCoreApplication::applicationDirPath() + "/translations/uuz_" + locale + ".qm";
+    if (locale == "en") return;
+    qInfo() << "加载翻译文件:" << translateFilePath;
+    // 加载应用程序的翻译文件
+    if (translator.load(translateFilePath)) {
+      QApplication::installTranslator(&translator);
+      qInfo() << "翻译文件加载成功";
+    }
+    else {
+      qWarning() << "翻译文件: " << translateFilePath << "未找到。";
+    }
+  }
+}
 
-
+//首次运行时候创建默认配置
 void MainWindow::initDefaultConfigFile() {
+  qInfo() << "创建默认配置文件";
   default_config_file_json = QCoreApplication::applicationDirPath().toStdString() + str_default_txt_path;
   currentFilePath          = QCoreApplication::applicationDirPath().toStdString() + str_default_config_json_path;
 
@@ -100,32 +66,45 @@ void MainWindow::initDefaultConfigFile() {
     //创建的，写入默认指定配置文件
     std::fstream ofs_default_config_file(default_config_file_json, std::ios::out);
     default_config_json["default_config_file_path"] = currentFilePath;
+    default_config_json["isStartUp"]                = false;
+    default_config_json["lang"]                     = QLocale::system().name().toStdString();
     ofs_default_config_file << std::setw(4) << default_config_json << "\n";
     ofs_default_config_file.close();
+
+    //空的，除了设置默认json外毫无用处
+    std::vector<uint32_t>    empty_vector_int;
+    std::vector<std::string> empty_vector_string;
 
     std::ofstream ofs(currentFilePath, std::ios::trunc);
     //构建json
     json jsonObject;
-    jsonObject[0]["name"]         = "1";
-    jsonObject[0]["L-Ctrl"]       = false;
-    jsonObject[0]["L-Alt"]        = false;
-    jsonObject[0]["R-Alt"]        = false;
-    jsonObject[0]["R-Ctrl"]       = false;
-    jsonObject[0]["shortcut_key"] = "";
-    jsonObject[0]["path"]         = "double click this";
-    jsonObject[0]["desc"]         = "desc";
-    jsonObject[0]["trigger"]      = 1;
-    jsonObject[0]["enable"]       = false;
+    jsonObject[0]["name"]                                      = "1";
+    jsonObject[0]["L-Ctrl"]                                    = false;
+    jsonObject[0]["L-Alt"]                                     = false;
+    jsonObject[0]["R-Alt"]                                     = false;
+    jsonObject[0]["R-Ctrl"]                                    = false;
+    jsonObject[0]["shortcut_key"]                              = "";
+    jsonObject[0]["path"]                                      = "";
+    jsonObject[0]["desc"]                                      = "desc";
+    jsonObject[0]["trigger"]                                   = 1;
+    jsonObject[0]["enable"]                                    = false;
+    jsonObject[0]["key"]                                       = 0;
+    jsonObject[0]["ShortcutKeyMsg"]["key_value_serial_number"] = empty_vector_int;
+    jsonObject[0]["ShortcutKeyMsg"]["key_value_total"]         = 0;
+    jsonObject[0]["ShortcutKeyMsg"]["str_key_list"]            = empty_vector_string;
     if (ofs) {
       ofs << std::setw(4) << jsonObject << "\n";
       ofs.close();
     }
+    //既然首次创建默认配置，那么说明这里是首次运行，显示主界面
+    this->show();
   }
   file_size = std::filesystem::file_size(default_config_file_json);
 
   std::fstream ifs_default_config_file(default_config_file_json, std::ios::in);
   if (!ifs_default_config_file) {
     QMessageBox::critical(nullptr, tr("Fail"), tr("open default error"));
+    qCritical() << "默认文件打开错误，退出";
     std::exit(0);
   }
 
@@ -139,6 +118,7 @@ void MainWindow::initDefaultConfigFile() {
   }
   catch (const nlohmann::json::parse_error & e) {
     //解析默认配置出现异常，删除重新新建一个
+    qWarning() << "解析默认配置出现异常";
     QMessageBox::critical(nullptr, tr("Fail"), tr("Set default config Fail,because: ") + e.what());
     std::filesystem::remove(default_config_file_json);
     std::ofstream ofs_default_config_file(default_config_file_json, std::ios::out);
@@ -156,109 +136,246 @@ void MainWindow::initDefaultConfigFile() {
   }
 }
 
-void MainWindow::initMenu() {
-  QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+//桌面右下角的托盘
+void MainWindow::initTray() {
+  // 创建托盘图标
+  trayIcon = new QSystemTrayIcon(this);
+  trayIcon->setIcon(QIcon(":/res/Resource/uuz_tray.ico")); // 设置托盘图标
 
-  // 在文件菜单中添加动作
-  QAction* openFileAction = new QAction(tr("&Open File"), this);
-  fileMenu->addAction(openFileAction);
+  // 创建托盘菜单
+  trayIconMenu           = new QMenu(this);
+  QAction* restoreAction = new QAction(tr("Display"), this);
+  QAction* quitAction    = new QAction(tr("quit"), this);
+  connect(restoreAction, &QAction::triggered, this, &MainWindow::onShowMainWindow);
+  connect(quitAction, &QAction::triggered, this, &MainWindow::onExitApplication);
 
-  QAction* createAction = new QAction(tr("&New File"), this);
-  fileMenu->addAction(createAction);
+  trayIconMenu->addAction(restoreAction);
+  trayIconMenu->addAction(quitAction);
 
-  QAction* openAction = new QAction(tr("&Import File"), this);
-  fileMenu->addAction(openAction);
+  trayIcon->setContextMenu(trayIconMenu);
 
-  fileMenu->addSeparator(); // 添加分隔符
+  // 连接托盘图标的信号
+  connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onTrayIconActivated);
 
-  QAction* exitAction = new QAction(tr("&Quit"), this);
-  fileMenu->addAction(exitAction);
-
-  //底部状态栏，用来显示提示信息
-  statusBar = new QStatusBar(this);
-  setStatusBar(statusBar);
-
-  //打开配置文件
-  connect(openFileAction, &QAction::triggered, [&]() {
-    QString filePath = QFileDialog::getOpenFileName(this, "Select the configuration file",
-                                                    QApplication::applicationDirPath() + "/config/",
-                                                    "Text files (*.json)");
-    if (filePath.isEmpty()) return;
-    qDebug() << filePath;
-
-    // 获取最后一个斜杠的位置
-    int lastSlashIndex     = filePath.lastIndexOf('/');
-    int lastBackslashIndex = filePath.lastIndexOf('\\');
-    // 取最后一个斜杠或反斜杠的较大者
-    int     lastIndex = qMax(lastSlashIndex, lastBackslashIndex);
-    QString filename;
-    if (lastIndex != -1) {
-      filename   = filePath.mid(lastIndex + 1);
-      int suffix = filename.lastIndexOf(".");
-      filename   = filename.left(suffix);
-    }
-
-    setWindowTitle(tr("Quick start-Currently in use: ") + filename);
-    currentFilePath = filePath.toLocal8Bit().constData(); //指定当前主页面选定配置
-    key_map.clear();
-    initContext(); //将配置文件内容填入
-  });
-
-  //新建配置文件
-  connect(createAction, &QAction::triggered, [&]() {
-    QString dirPath = QCoreApplication::applicationDirPath();
-    qDebug() << dirPath;
-
-    std::string configPath = dirPath.toStdString() + "/config";
-
-    auto parentPath = std::filesystem::path(configPath);
-    if (!std::filesystem::exists(parentPath)) {
-      if (!std::filesystem::create_directories(parentPath)) {
-        qDebug() << "Failed to create directory: " << parentPath;
-        return;
-      }
-    }
-
-    while (true) {
-      // 显示输入对话框，获取用户输入的文本
-      QString text = QInputDialog::getText(nullptr, tr("input"), tr("Please enter the configuration file name:"));
-      if (text.isEmpty()) return;
-      std::string ABFileName = configPath + "/" + text.toLocal8Bit().constData() + ".json";
-      //文件不存在则创建，存在则提示文件已存在请重新输入
-      if (std::filesystem::exists(ABFileName)) {
-        QMessageBox::warning(this, tr("warning"), tr("The file already exists, please re -enter"));
-      }
-      else {
-        std::ofstream os(ABFileName, std::ios::out);
-        if (os.is_open()) {
-          os.close();
-          currentFilePath = ABFileName; //指定当前主页面选定配置
-          setWindowTitle(tr("Quick start-Currently in use: ") + text);
-          clearModel();
-          initContext();
-          key_map.clear();
-        }
-        else {
-          QMessageBox::critical(nullptr, tr("Fail"), tr("File creation failed"));
-        }
-        break;
-      }
-    }
-  });
-
-  //退出
-  connect(exitAction, &QAction::triggered, []() {
-    std::exit(0);
-  });
+  // 显示托盘图标
+  trayIcon->show();
 }
 
-void MainWindow::initConnect() {}
+//初始化菜单栏
+void MainWindow::initMenu() {
+  //第一个菜单
+  {
+    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
 
+    // 在文件菜单中添加动作
+    QAction* openFileAction = new QAction(tr("&Open File"), this);
+    openFileAction->setIcon(QIcon(":/res/Resource/open file.svg"));
+    fileMenu->addAction(openFileAction);
+
+    QAction* createAction = new QAction(tr("&New File"), this);
+    createAction->setIcon(QIcon(":/res/Resource/create file.svg"));
+    fileMenu->addAction(createAction);
+
+    // QAction* openAction = new QAction(tr("&Import File"), this);
+    // fileMenu->addAction(openAction);
+
+    fileMenu->addSeparator(); // 添加分隔符
+
+    //开机启动
+    QAction* startupAction = new QAction(tr("&boot startup"), this);
+    {
+      std::ifstream readConfig(default_config_file_json);
+      if (readConfig) {
+        // 分配内存
+        std::string jsonData;
+        uintmax_t   size = std::filesystem::file_size(default_config_file_json);
+        jsonData.resize(size);
+        // 读取文件内容
+        readConfig.read(&jsonData.at(0), size);
+        readConfig.close();
+        //解析json
+        auto tmp_json = json::parse(jsonData);
+        if (tmp_json["isStartUp"].get<bool>()) {
+          startupAction->setIcon(QIcon(":/res/Resource/gou.svg"));
+        }
+      }
+    }
+
+    fileMenu->addAction(startupAction);
+
+    fileMenu->addSeparator(); // 添加分隔符
+
+    QAction* exitAction = new QAction(tr("&Quit"), this);
+    exitAction->setIcon(QIcon(":/res/Resource/exit.svg"));
+    fileMenu->addAction(exitAction);
+
+    //底部状态栏，用来显示提示信息
+    statusBar = new QStatusBar(this);
+    setStatusBar(statusBar);
+
+    //打开配置文件
+    connect(openFileAction, &QAction::triggered, [&]() {
+      QString filePath = QFileDialog::getOpenFileName(this, "Select the configuration file",
+                                                      QApplication::applicationDirPath() + "/config/",
+                                                      "Text files (*.json)");
+      if (filePath.isEmpty()) return;
+      qDebug() << filePath;
+
+      // 获取最后一个斜杠的位置
+      int lastSlashIndex     = filePath.lastIndexOf('/');
+      int lastBackslashIndex = filePath.lastIndexOf('\\');
+      // 取最后一个斜杠或反斜杠的较大者
+      int     lastIndex = qMax(lastSlashIndex, lastBackslashIndex);
+      QString filename;
+      if (lastIndex != -1) {
+        filename   = filePath.mid(lastIndex + 1);
+        int suffix = filename.lastIndexOf(".");
+        filename   = filename.left(suffix);
+      }
+
+      setWindowTitle(tr("Quick start-Currently in use: ") + filename);
+      currentFilePath = filePath.toLocal8Bit().constData(); //指定当前主页面选定配置
+      key_map.clear();
+      initContext(); //将配置文件内容填入
+      qInfo() << "打开配置文件";
+    });
+
+    //新建配置文件
+    connect(createAction, &QAction::triggered, [&]() {
+      qInfo() << "新建配置文件";
+      QString dirPath = QCoreApplication::applicationDirPath();
+      qDebug() << dirPath;
+
+      std::string configPath = dirPath.toStdString() + "/config";
+
+      auto parentPath = std::filesystem::path(configPath);
+      if (!std::filesystem::exists(parentPath)) {
+        if (!std::filesystem::create_directories(parentPath)) {
+          qDebug() << "Failed to create directory: " << parentPath;
+          qWarning() << "无法新建配置文件";
+          return;
+        }
+      }
+
+      while (true) {
+        // 显示输入对话框，获取用户输入的文本
+        QString text = QInputDialog::getText(nullptr, tr("input"), tr("Please enter the configuration file name:"));
+        if (text.isEmpty()) return;
+        std::string ABFileName = configPath + "/" + text.toLocal8Bit().constData() + ".json";
+        //文件不存在则创建，存在则提示文件已存在请重新输入
+        if (std::filesystem::exists(ABFileName)) {
+          QMessageBox::warning(this, tr("warning"), tr("The file already exists, please re -enter"));
+        }
+        else {
+          std::ofstream os(ABFileName, std::ios::out);
+          if (os.is_open()) {
+            os.close();
+            currentFilePath = ABFileName; //指定当前主页面选定配置
+            setWindowTitle(tr("Quick start-Currently in use: ") + text);
+            clearModel();
+            initContext();
+            key_map.clear();
+          }
+          else {
+            QMessageBox::critical(nullptr, tr("Fail"), tr("File creation failed"));
+            qWarning() << "新建文件失败";
+          }
+          break;
+        }
+      }
+    });
+
+    //设置为开机启动/取消开机启动
+    connect(startupAction, &QAction::triggered, [=] {
+      //如果没有设置图标，说明不是开机启动，就要设置为开机启动
+      bool isStartUp;
+      if (startupAction->icon().isNull()) {
+        setStartup();
+        startupAction->setIcon(QIcon(":/res/Resource/gou.svg"));
+        isStartUp = true;
+      }
+      else {
+        //如果有图标，说明已经是开机启动了，需要关闭开机启动
+        unSetStartup();
+        //删除图标
+        startupAction->setIcon(QIcon());
+        isStartUp = false;
+      }
+
+      //修改配置文件
+      //1.先读出来
+      std::ifstream if_defaultConfig(default_config_file_json);
+      if (if_defaultConfig) {
+        // 分配内存
+        std::string jsonData;
+        uintmax_t   size = std::filesystem::file_size(default_config_file_json);
+        jsonData.resize(size);
+        // 读取文件内容
+        if_defaultConfig.read(&jsonData.at(0), size);
+        if_defaultConfig.close();
+        //解析json
+        auto tmp_json         = json::parse(jsonData);
+        tmp_json["isStartUp"] = isStartUp;
+
+
+        //2.在写回去
+        std::ofstream of_defaultConfig(default_config_file_json, std::ios::trunc);
+        if (of_defaultConfig) {
+          of_defaultConfig << std::setw(4) << tmp_json << "\n";
+          of_defaultConfig.close();
+          if (isStartUp) {
+            qInfo() << "设置为开机启动";
+            statusBar->showMessage(tr("boot startUp set success"));
+          }
+          else {
+            qInfo() << "取消开机启动";
+            statusBar->showMessage(tr("Cancel the boot start"));
+          }
+        }
+      }
+    });
+
+    //退出
+    connect(exitAction, &QAction::triggered, []() {
+      qInfo() << "程序退出";
+      std::exit(0);
+    });
+  }
+
+  //第二个菜单 翻译
+  {
+    QMenu* lang_menu = menuBar()->addMenu(tr("language"));
+
+    QAction* zh_cn_action = new QAction("中文", this);
+    zh_cn_action->setData("zh");
+    lang_menu->addAction(zh_cn_action);
+
+    QAction* english_action = new QAction("English", this);
+    english_action->setData("");
+    lang_menu->addAction(english_action);
+
+    if (default_config_json["lang"] == "zh_CN") {
+      zh_cn_action->setIcon(QIcon(":/res/Resource/gou.svg"));
+    }
+    else if (default_config_json["lang"] == "en") {
+      english_action->setIcon(QIcon(":/res/Resource/gou.svg"));
+    }
+
+    connect(zh_cn_action, &QAction::triggered, [this]() {
+      switchLanguage("zh_CN");
+    });
+    connect(english_action, &QAction::triggered, [this]() {
+      switchLanguage("en");
+    });
+  }
+}
+
+//初始化视图，并注册委托
 void MainWindow::initTableView() {
   table_view = new QTableView(this);
   // table_view->horizontalHeader()->setSectionsMovable(true); //列可拖动（拖动会导致拖动后新读取的数据还是按照默认的顺序填入，暂时放弃）
   //设置代理
-  delegate_ = new SubStyledItemDelegate(this);
+  delegate_ = new sub_styled_item_delegate(this);
   //因为有个特殊的自定的弹出框失去焦点就会消失，所以在eventFilter中阻断了传播，但是也会导致其他正常的列会出现不打开另一个编辑器，当前*编辑器就无法关闭和提交数据
   // table_view->setItemDelegate(delegate_);
   table_view->setItemDelegateForColumn(1, delegate_);
@@ -270,13 +387,17 @@ void MainWindow::initTableView() {
   table_view->setItemDelegateForColumn(8, delegate_);
   table_view->setItemDelegateForColumn(9, delegate_);
   table_view->setItemDelegateForColumn(10, delegate_);
+  new Trigger(); //用于委托的触发选择下拉框的枚举
 
   // 设置列宽自适应
   table_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
+//初始化页面和简单的按钮绑定
 void MainWindow::initView() {
-  QGridLayout* layout = new QGridLayout(this);
+  setWindowTitle(tr("Start quickly"));
+
+  QGridLayout* layout = new QGridLayout;
 
   layout->addWidget(table_view, 0, 0, 9, 10);
 
@@ -285,34 +406,14 @@ void MainWindow::initView() {
   layout->addItem(horizontalSpacer, 9, 0, 1, 6);
 
   QHBoxLayout* h_btns_box_layout = new QHBoxLayout();
-  QPushButton* btn_add           = new QPushButton("+", this);
-  QPushButton* btn_jian          = new QPushButton("-", this);
-  QPushButton* btn_save          = new QPushButton(tr("save"), this);
-  QPushButton* btn_set_default   = new QPushButton(tr("Set to default"), this);
+  QPushButton* btn_add           = new QPushButton(tr("add new row"), this);
+  // QPushButton* btn_jian          = new QPushButton("-", this);
+  QPushButton* btn_save        = new QPushButton(tr("save"), this);
+  QPushButton* btn_set_default = new QPushButton(tr("Set to default"), this);
   h_btns_box_layout->addWidget(btn_add);
-  h_btns_box_layout->addWidget(btn_jian);
+  // h_btns_box_layout->addWidget(btn_jian);
   h_btns_box_layout->addWidget(btn_save);
   h_btns_box_layout->addWidget(btn_set_default);
-
-  //测试按钮
-#ifdef _DEBUG
-  QPushButton* btn_test = new QPushButton("test", this);
-  h_btns_box_layout->addWidget(btn_test);
-  connect(btn_test, &QPushButton::clicked, this, [&]() {
-    QModelIndex index      = model_->index(0, 6); // 获取指定行的索引
-    QVariant    itemData   = model_->data(index); // 获取数据
-    QString     itemString = itemData.toString(); // 将数据转换为字符串
-    qDebug() << "path: " << itemString;
-    // QProcess* process = new QProcess(this);
-    // process->start(itemString);
-    QString filePath = QDir::toNativeSeparators(itemString); // 转为本地格式，避免中文路径无法启动
-    QUrl    fileUrl  = QUrl::fromLocalFile(filePath);        //转为url方便启动
-    QDesktopServices::openUrl(fileUrl);                      //使用该函数可以打开exe，也能打开jpg，txt等文件，更适用这里
-    // for (auto map : key_map) {
-    //   std::cout << "key: " << map.first << "   value: " << map.second.key_value_total << +" ";
-    // }
-  });
-#endif
 
   layout->addLayout(h_btns_box_layout, 9, 6, 1, 4);
 
@@ -323,11 +424,13 @@ void MainWindow::initView() {
   connect(btn_set_default, &QPushButton::clicked, this, &MainWindow::updateDefaultConfigFile);
 }
 
+//初始化配置内容
 void MainWindow::initContext() const {
   if (currentFilePath.empty()) return;
   //如果正在编辑的配置文件处于空文件则直接开始准备数据
   if (!std::filesystem::exists(currentFilePath)) {
-    qDebug("initContext_文件不存在");
+    // qDebug("initContext_文件不存在");
+    qWarning() << "initContext_文件不存在";
     return;
   }
   //读取文件判断有无内容
@@ -342,6 +445,8 @@ void MainWindow::initContext() const {
   }
   else {
     //无内容，准备一行数据
+    qInfo() << "无内容，准备一行数据";
+
     QStandardItem* root              = model_->invisibleRootItem();
     QStandardItem* item_name_string  = new QStandardItem();
     QStandardItem* item_L_ctrl_bool  = new QStandardItem();
@@ -378,19 +483,21 @@ void MainWindow::initContext() const {
   }
 }
 
+//初始化模型
 void MainWindow::initModel() {
   model_ = new QStandardItemModel();
   model_->setRowCount(1);
   model_->setColumnCount(9);
   setTableHead();
-
   table_view->setModel(model_);
 }
 
+//解析json
 json MainWindow::analyzeJson() const {
   std::ifstream iFile(currentFilePath);
   if (!iFile.is_open()) {
     QMessageBox::critical(nullptr, tr("open file error"), tr("open file error"));
+    qWarning() << "打开文件失败";
     return nullptr;
   }
   uintmax_t file_size = std::filesystem::file_size(currentFilePath);
@@ -406,12 +513,15 @@ json MainWindow::analyzeJson() const {
     json_ = json::parse(jsonData);
   }
   catch (const nlohmann::json::parse_error & e) {
+    qWarning() << "配置文件解析异常";
     QMessageBox::critical(nullptr, tr("Configuration file parse Exception"), QString::fromStdString(e.what()));
   }
   return json_;
 }
 
+//保存配置文件
 void MainWindow::savaConfigJson() const {
+  qInfo() << "保存配置文件";
   //构建json
   json jsonObject;
 
@@ -437,6 +547,14 @@ void MainWindow::savaConfigJson() const {
     jsonObject[i]["ShortcutKeyMsg"]["key_value_total"]         = tmp_shortcut_key_msg.key_value_total;
     jsonObject[i]["ShortcutKeyMsg"]["key_value_serial_number"] = tmp_shortcut_key_msg.key_value_serial_number;
     jsonObject[i]["ShortcutKeyMsg"]["str_key_list"]            = tmp_shortcut_key_msg.str_key_list;
+
+    if (model_->index(i, 6).data(Qt::DisplayRole).toString().toStdString().empty()) {
+      QMessageBox::warning(nullptr, tr("path is null"), tr("Please enter the correct path"));
+      return;
+    }
+    // if(key == 0) {
+    //     QMessageBox::warning(nullptr, tr("key is null"), tr("Please enter the correct path"));
+    // }
   }
 
   std::ofstream oFile(currentFilePath, std::ios::out | std::ios::trunc);
@@ -445,13 +563,16 @@ void MainWindow::savaConfigJson() const {
     oFile.close();
     statusBar->showMessage(tr("save success"));
     glob_json_ = jsonObject;
+    updateModel(jsonObject);
   }
   else {
     QMessageBox::critical(nullptr, tr("write error"), tr("Error writing configuration file"));
   }
 }
 
+//更新模型数据
 void MainWindow::updateModel(const nlohmann::json & json_) const {
+  qInfo() << "更新模型数据";
   model_->clear();
 
   setTableHead();
@@ -498,9 +619,13 @@ void MainWindow::updateModel(const nlohmann::json & json_) const {
     item_shortcut_key->setData(json_[i]["key"].get<int>(), ROLE_KEY);
     ShortcutKeyMsg shortcut_key_msg;
     shortcut_key_msg.key_value_total         = json_[i]["ShortcutKeyMsg"]["key_value_total"].get<int>();
-    shortcut_key_msg.key_value_serial_number = json_[i]["ShortcutKeyMsg"]["key_value_serial_number"].get<std::vector<uint32_t>>();
+    shortcut_key_msg.key_value_serial_number = json_[i]["ShortcutKeyMsg"]["key_value_serial_number"].get<std::vector<
+      uint32_t>>();
     shortcut_key_msg.str_key_list = json_[i]["ShortcutKeyMsg"]["str_key_list"].get<std::vector<std::string>>();
     item_shortcut_key->setData(QVariant::fromValue(shortcut_key_msg), ROLE_VEC_KEY_NUM);
+
+    //如果是首次创建配置文件，则会出现key为0的情况，会导致首次触发快捷键的时候报错，因此排除掉
+    if (json_[i]["key"].get<int>() == 0) continue;
 
     //同时将这些数据交给全局map提供给 StartQuickly 处理
     key_map.emplace(json_[i]["key"].get<int>(), json_[i]["ShortcutKeyMsg"].get<ShortcutKeyMsg>());
@@ -508,6 +633,7 @@ void MainWindow::updateModel(const nlohmann::json & json_) const {
   statusBar->showMessage(tr("read success"));
 }
 
+//添加一行新配置
 void MainWindow::addViewNewRow() const {
   QStandardItem* item_name_string     = new QStandardItem();
   QStandardItem* item_L_ctrl_bool     = new QStandardItem();
@@ -535,13 +661,15 @@ void MainWindow::addViewNewRow() const {
   QList<QStandardItem*> newRowItems;
 
   newRowItems << item_name_string << item_L_ctrl_bool << item_L_alt_bool << item_R_alt_bool << item_R_ctrl_bool <<
-    item_shortcut_key << item_path_string <<
-    item_trigger_enum << item_trigger_enum << item_enable_bool;
+    item_shortcut_key << item_path_string << item_describe_string <<
+    item_trigger_enum << item_enable_bool;
 
   model_->appendRow(newRowItems);
 }
 
+//更新默认配置文件（txt那个）
 void MainWindow::updateDefaultConfigFile() {
+  qInfo() << "更新默认配置文件";
   //不知道为什么不能用 fstream，读后，移动指针到头部，再写入也无法更改文件内容
   std::ifstream ifs_tmp_update_default_config_json(default_config_file_json, std::ios::in);
   if (!ifs_tmp_update_default_config_json) {
@@ -569,6 +697,7 @@ void MainWindow::updateDefaultConfigFile() {
   QMessageBox::information(this, tr("Success"), tr("Operation completed successfully."));
 }
 
+//清空模型数据
 void MainWindow::clearModel() const {
   model_->clear();
   model_->setRowCount(1);
@@ -576,10 +705,147 @@ void MainWindow::clearModel() const {
   setTableHead();
 }
 
+//设置视图的列名称
 void MainWindow::setTableHead() const {
   model_->setHorizontalHeaderLabels(
-    QStringList() << tr("Name") << tr("L-Ctrl") << tr("L-Alt") << tr("R-Alt") << tr("R-Ctrl") << tr("Shortcut_key") <<
+    QStringList() << tr("Name") << "L-Ctrl" << "L-Alt" << "R-Alt" << "R-Ctrl" << tr("Shortcut_key") <<
     tr("Path") << tr("Desc") <<
     tr("Trigger") <<
     tr("Enable") << tr("Delete"));
+}
+
+//托盘事件
+void MainWindow::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason) {
+  if (reason == QSystemTrayIcon::DoubleClick) {
+    show();
+    raise();          // 确保窗口在其他窗口之上
+    activateWindow(); // 激活窗口
+  }
+}
+
+// 拦截关闭事件，最小化到托盘而不是退出
+void MainWindow::closeEvent(QCloseEvent* event) {
+  if (trayIcon->isVisible()) {
+    hide();
+    event->ignore();
+  }
+}
+
+//托盘事件，显示主页面
+void MainWindow::onShowMainWindow() {
+  show();
+  raise();
+  activateWindow();
+}
+
+//托盘事件，退出程序
+void MainWindow::onExitApplication() const {
+  trayIcon->hide(); // 隐藏托盘图标
+  qApp->quit();     // 退出应用程序
+}
+
+//槽:开机启动
+void MainWindow::setStartup() {
+  const QString & targetFilePath   = QCoreApplication::applicationFilePath();
+  const QString & shortcutFilePath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Startup"
+                                     + "/" + QFileInfo(targetFilePath).baseName() + ".lnk";;
+  const QString & description = "";
+  QFile           shortcutFile(shortcutFilePath);
+
+  if (shortcutFile.exists()) {
+    qInfo() << "开机启动设置成功.";
+  }
+
+  QString vbsScript = QDir::temp().absoluteFilePath("createShortcut.vbs");
+  QFile   file(vbsScript);
+  if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QTextStream out(&file);
+    QString     targetPath   = targetFilePath;
+    QString     shortcutPath = shortcutFilePath;
+    targetPath.replace("/", "\\");
+    shortcutPath.replace("/", "\\");
+
+    out << "Set oWS = WScript.CreateObject(\"WScript.Shell\")\n";
+    out << "sLinkFile = \"" << shortcutPath << "\"\n";
+    out << "Set oLink = oWS.CreateShortcut(sLinkFile)\n";
+    out << "oLink.TargetPath = \"" << targetPath << "\"\n";
+    out << "oLink.WorkingDirectory = \"" << QFileInfo(targetPath).absolutePath().replace("/", "\\") << "\"\n";
+    if (!description.isEmpty()) {
+      out << "oLink.Description = \"" << description << "\"\n";
+    }
+    out << "oLink.Save\n";
+    file.close();
+  }
+  else {
+    qWarning() << "Failed to create VBS file.开机启动设置失败";
+  }
+
+  QProcess process;
+  process.start("wscript", QStringList() << vbsScript);
+  process.waitForFinished();
+  file.remove();
+}
+
+//槽:取消开机启动
+void MainWindow::unSetStartup() {
+  QString targetFilePath   = QCoreApplication::applicationFilePath();
+  QString startupDir       = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Startup";
+  QString shortcutFilePath = startupDir + "/" + QFileInfo(targetFilePath).baseName() + ".lnk";
+
+  QFile shortcutFile(shortcutFilePath);
+  if (shortcutFile.exists() && shortcutFile.remove()) {
+    qInfo() << "取消开机启动设置成功";
+  }
+  else {
+    qInfo() << "取消开机启动设置失败";
+  }
+}
+
+//切换翻译
+void MainWindow::switchLanguage(const QString & lang) {
+  std::ifstream if_defaultConfig(default_config_file_json);
+  if (if_defaultConfig) {
+    // 分配内存
+    std::string jsonData;
+    uintmax_t   size = std::filesystem::file_size(default_config_file_json);
+    jsonData.resize(size);
+    // 读取文件内容
+    if_defaultConfig.read(&jsonData.at(0), size);
+    if_defaultConfig.close();
+    //解析json
+    auto tmp_json    = json::parse(jsonData);
+    tmp_json["lang"] = lang.toStdString();
+
+
+    //2.在写回去
+    std::ofstream of_defaultConfig(default_config_file_json, std::ios::trunc);
+    if (of_defaultConfig) {
+      of_defaultConfig << std::setw(4) << tmp_json << "\n";
+      of_defaultConfig.close();
+      qInfo() << "设置默认语言成功";
+      statusBar->showMessage(tr("boot startUp set success"));
+
+      //是否立即重启
+      QMessageBox::StandardButton reply;
+      reply = QMessageBox::question(this, tr("Restart Application"), tr("Do you want to restart the application?"),
+                                    QMessageBox::Yes | QMessageBox::No);
+      if (reply) {
+        //重启前释放互斥体，解除不能重复启动的限制
+        if (hMutex) {
+          ReleaseMutex(hMutex);
+          CloseHandle(hMutex);
+        }
+        // 获取当前应用程序的可执行路径
+        QString     program          = QCoreApplication::applicationFilePath();
+        QStringList arguments        = QCoreApplication::arguments();
+        QString     workingDirectory = QDir::currentPath();
+        // 启动新进程
+        QProcess::startDetached(program, arguments, workingDirectory);
+
+        // 退出当前进程
+        this->close();
+        QCoreApplication::quit();
+      }
+    }
+  }
 }

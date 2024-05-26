@@ -4,11 +4,11 @@
 #include <filesystem>
 #include <thread>
 
-// #include <io.h>
-// #include <fcntl.h>
+#include <QTranslator>
+#include <QLibraryInfo>
 
+#include "logger.h"
 #include "mainwindow.h"
-#include "Trigger.hpp"
 #include "startQuickly.h"
 
 
@@ -24,25 +24,44 @@ void initDir();
 
 
 int main(int argc, char* argv[]) {
-    // SetConsoleOutputCP(CP_UTF8);
-    // _setmode(_fileno(stdout), _O_U16TEXT);
+  // SetConsoleOutputCP(CP_UTF8);
+  // _setmode_fileno(stdout), _O_U16TEXT);
+
+  //避免重复启动
   isRepeat();
 
   QApplication a(argc, argv);
+  // 设置全局应用程序图标
+  QApplication::setWindowIcon(QIcon(":/res/Resource/uuz_logo.ico"));
 
+  //创建配置文件夹
   initDir();
 
-  new Trigger();
+  // 设置日志保留天数
+  Logger::getLogger().set_retention_days(7);
+  // 安装自定义消息处理程序
+  qInstallMessageHandler(Logger::messageHandler);
+
 
   StartQuickly* start_quickly_1 = StartQuickly::getStartQuickly();
 
   MainWindow w;
   globalVar = &w;
-  w.show();
 
-  return a.exec();
+  //Release情况下默认不显示主窗口，只显示托盘图标
+#ifdef _DEBUG
+  w.show();
+#endif
+
+  a.exec();
+
+  //卸载钩子，终止windows键盘循环等各种线程循环
+  delete start_quickly_1;
+
+  return 0;
 }
 
+//避免重复启动
 void isRepeat() {
   // 创建一个互斥体避免重复启动
   hMutex = CreateMutex(NULL, TRUE, L"shortcut_key");

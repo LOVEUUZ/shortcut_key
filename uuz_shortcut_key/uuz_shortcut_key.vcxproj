@@ -63,6 +63,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -85,7 +90,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -93,14 +98,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="keyEvent.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="my_dialog_accept_filepath.cpp" />
     <ClCompile Include="my_dialog_key_input.cpp" />
     <ClCompile Include="my_lineedit_exe_path.cpp" />
     <ClCompile Include="startQuickly.cpp" />
     <ClCompile Include="substyleditemdelegate.cpp" />
-    <ClCompile Include="timedSet.cpp" />
     <ClCompile Include="WindowsHookEx.cpp" />
-    <QtRcc Include="mainwindow.qrc" />
+    <QtRcc Include="Resource.qrc" />
     <QtUic Include="mainwindow.ui" />
     <QtMoc Include="mainwindow.h" />
     <ClCompile Include="mainwindow.cpp" />
@@ -110,11 +115,6 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
-    <None Include="uuz_shortcut_key.ico" />
-    <ResourceCompile Include="uuz_shortcut_key.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtTranslation Include="translations\uuz_en_US.ts" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="my_lineedit_exe_path.h" />
@@ -122,13 +122,20 @@
   <ItemGroup>
     <ClInclude Include="json.hpp" />
     <ClInclude Include="keyEvent.h" />
+    <QtMoc Include="logger.h" />
     <ClInclude Include="startQuickly.h" />
-    <ClInclude Include="timedSet.h" />
     <ClInclude Include="WindowsHookEx.h" />
     <QtMoc Include="my_dialog_key_input.h" />
     <QtMoc Include="Trigger.hpp" />
     <QtMoc Include="substyleditemdelegate.h" />
     <QtMoc Include="my_dialog_accept_filepath.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+    <None Include="uuz_zh_CN.qm" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtTranslation Include="uuz_zh_CN.ts" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

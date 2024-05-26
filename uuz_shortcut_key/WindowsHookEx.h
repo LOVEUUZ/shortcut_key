@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <windows.h>
+
 #include <string>
 #include <thread>
 #include <atomic>
@@ -8,9 +8,11 @@
 #include <functional>
 #include <queue>
 
+#include <windows.h>
+
 #include "keyEvent.h"
 
-
+//核心，windows钩子
 class WindowsHookEx {
   public:
     static WindowsHookEx* ptr_windows_hook;
@@ -25,6 +27,9 @@ class WindowsHookEx {
     bool setFunc(const std::function<void(KeyEvent)> & newFunc);
 
   private:
+    explicit WindowsHookEx() = default;
+    ~WindowsHookEx()         = default;
+
     HHOOK             hook;
     MSG               msg;
     std::thread       msgLoopThread;
@@ -33,15 +38,11 @@ class WindowsHookEx {
 
     std::queue<KeyEvent>          queue_; //按键队列
     std::mutex                    mtx_write;
-    std::function<void(KeyEvent)> func = nullptr;
+    std::function<void(KeyEvent)> func = nullptr; //存储当前接收的策略
 
-    explicit WindowsHookEx() = default;
+    void messageLoop(); //循环windows键盘事件
 
-    ~WindowsHookEx() = default;
+    static std::string getKeyName(DWORD vkCode); //获取按键对应名称
 
-    void messageLoop();
-
-    static std::string getKeyName(DWORD vkCode);
-
-    static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam); //钩子函数
 };

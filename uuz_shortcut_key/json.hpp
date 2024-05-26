@@ -13609,9 +13609,9 @@ class iter_impl // NOLINT(cppcoreguidelines-special-member-functions,hicpp-speci
     }
 
   JSON_PRIVATE_UNLESS_TESTED:
-    /// associated JSON instance
+    /// associated JSON getLogger
     pointer m_object = nullptr;
-    /// the actual iterator of the associated instance
+    /// the actual iterator of the associated getLogger
     internal_iterator<typename std::remove_const<BasicJsonType>::type> m_it {};
 };
 

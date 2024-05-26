@@ -2,13 +2,14 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 
-My_lineEdit_exe_path::My_lineEdit_exe_path(QWidget* parent)
-  : QLineEdit(parent) {}
+my_line_edit_exe_path::my_line_edit_exe_path(QWidget* parent): QLineEdit(parent) {
+  this->installEventFilter(this);
+}
 
-My_lineEdit_exe_path::~My_lineEdit_exe_path() {}
+my_line_edit_exe_path::~my_line_edit_exe_path() {}
 
 //拖放操作进入窗口部件的边界时被调用
-void My_lineEdit_exe_path::dragEnterEvent(QDragEnterEvent* event) {
+void my_line_edit_exe_path::dragEnterEvent(QDragEnterEvent* event) {
   if (event->mimeData()->hasUrls()) {
     event->acceptProposedAction(); //接受该动作
   }
@@ -19,7 +20,8 @@ void My_lineEdit_exe_path::dragEnterEvent(QDragEnterEvent* event) {
 }
 
 //拖放操作完成，数据被放置在窗口部件上时被调用
-void My_lineEdit_exe_path::dropEvent(QDropEvent* event) {
+void my_line_edit_exe_path::dropEvent(QDropEvent* event) {
+  qInfo() << "获取拖拽文件路径";
   const QMimeData* mimeData = event->mimeData();
   if (mimeData->hasUrls()) {
     QList<QUrl> urlList = mimeData->urls();
@@ -37,4 +39,18 @@ void My_lineEdit_exe_path::dropEvent(QDropEvent* event) {
 
   // 不能调用父类的dropEvent方法
   // QLineEdit::dropEvent(event);
+}
+
+bool my_line_edit_exe_path::eventFilter(QObject* watched, QEvent* event) {
+  // 处理双击事件
+  if (event->type() == QEvent::MouseButtonDblClick) {
+    // 打开文件选择对话框
+    qInfo() << "双击选择文件";
+    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("choose file"), QDir::homePath() + "/Desktop", "");
+    if (!fileName.isEmpty()) {
+      this->setText(fileName);
+    }
+  }
+
+  return QLineEdit::eventFilter(watched, event);
 }

@@ -41,9 +41,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="mainwindow.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
     <QtUic Include="mainwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -53,12 +50,9 @@
     <ClCompile Include="mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <None Include="uuz_shortcut_key.ico">
+    <QtRcc Include="Resource.qrc">
       <Filter>Resource Files</Filter>
-    </None>
-    <ResourceCompile Include="uuz_shortcut_key.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    </QtRcc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -85,19 +79,11 @@
     <ClCompile Include="WindowsHookEx.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="timedSet.cpp">
-      <Filter>Source Files\Component</Filter>
+    <ClCompile Include="logger.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtTranslation Include="translations\uuz_en_US.ts">
-      <Filter>Translation Files</Filter>
-    </QtTranslation>
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="Trigger.hpp">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="my_dialog_accept_filepath.h">
       <Filter>Header Files\Component</Filter>
     </QtMoc>
@@ -113,6 +99,12 @@
     <QtMoc Include="substyleditemdelegate.h">
       <Filter>Header Files\delegate</Filter>
     </QtMoc>
+    <QtMoc Include="logger.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Trigger.hpp">
+      <Filter>Source Files\Component</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp">
@@ -127,8 +119,16 @@
     <ClInclude Include="startQuickly.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="timedSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+    <None Include="uuz_zh_CN.qm">
+      <Filter>Translation Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <QtTranslation Include="uuz_zh_CN.ts">
+      <Filter>Translation Files</Filter>
+    </QtTranslation>
   </ItemGroup>
 </Project>

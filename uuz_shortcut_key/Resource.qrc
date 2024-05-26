@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/res">
+        <file>Resource/uuz_logo.ico</file>
+        <file>Resource/uuz_tray.ico</file>
+        <file>Resource/gou.svg</file>
+        <file>Resource/create file.svg</file>
+        <file>Resource/open file.svg</file>
+        <file>Resource/exit.svg</file>
+    </qresource>
+</RCC>
