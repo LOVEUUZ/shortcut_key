@@ -375,11 +375,6 @@ void StartQuickly::startProcess(const std::string & path) {
       // 如果是 .exe 文件，直接打开
       if (_wcsicmp(extension.c_str(), L".exe") == 0) {
         ShellExecute(NULL, NULL, wpath, NULL, NULL, SW_SHOWDEFAULT);
-
-        // 构建命令字符串，使用cmd /c来执行exe文件并在完成后关闭cmd窗口
-        // 构建命令字符串，先cd到目标目录，然后执行可执行文件
-        // std::string command = std::string("cmd /c cd ") + directoryPath + " && " + path;
-        // system("cmd /c F:/GAL/星辰恋曲的白色永恒/星辰恋曲的白色永恒/WhiteEternity.exe");
       }
       else {
         // 否则，使用默认程序打开
