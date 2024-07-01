@@ -14,6 +14,7 @@
 * 无需通过注册表即可设置开机启动
 * 简单易用的日志消息
 * 配置简单，全可视化
+* 配置一键导出与导入
 * 支持 中/英 语言轻松切换
 
 ## 使用
@@ -44,7 +45,11 @@
 ### 6.开机启动演示
 ![1_配置的创建与切换](https://github.com/LOVEUUZ/res/blob/main/uuz_shortcut_key/6_%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%E6%BC%94%E7%A4%BA.gif?raw=true)
 
+### 7.配置文件一键导入导出演示
+![1_配置的一键导出与导入](https://github.com/LOVEUUZ/res/blob/main/uuz_shortcut_key/7_%E4%B8%80%E9%94%AE%E5%AF%BC%E5%85%A5%E4%B8%8E%E5%AF%BC%E5%87%BA%E9%85%8D%E7%BD%AE.gif?raw=true)
+
 ## 下载地址
+https://github.com/LOVEUUZ/shortcut_key/releases
 
 ## 项目结构 
 ![项目结构](https://github.com/LOVEUUZ/res/blob/main/uuz_shortcut_key/%E7%BB%93%E6%9E%84.png?raw=true)

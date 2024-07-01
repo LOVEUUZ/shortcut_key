@@ -131,9 +131,6 @@
     <ClInclude Include="startQuickly.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="quazip.h">
-      <Filter>Header Files\Component</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uuz_zh_CN.qm">

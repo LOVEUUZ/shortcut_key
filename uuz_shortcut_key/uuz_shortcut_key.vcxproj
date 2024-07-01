@@ -141,7 +141,6 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="keyEvent.h" />
     <QtMoc Include="logger.h" />
-    <ClInclude Include="quazip.h" />
     <ClInclude Include="startQuickly.h" />
     <QtMoc Include="tools.h" />
     <ClInclude Include="WindowsHookEx.h" />
