@@ -22,6 +22,7 @@
 #include <QStandardPaths>
 #include <QProcess>
 
+
 #include <utility>
 #include <Windows.h>
 #include "WindowsHookEx.h"
@@ -33,6 +34,7 @@
 #include "my_lineedit_exe_path.h"
 
 #include "Trigger.hpp"
+#include "tools.h"
 
 //main中定义的全局变量
 extern HANDLE         hMutex;
@@ -71,6 +73,9 @@ class MainWindow : public QMainWindow {
 
     const std::string str_default_txt_path         = "/config/default.txt";
     const std::string str_default_config_json_path = "/config/default_config.json";
+
+    //菜单栏
+    QAction* openFileAction; //打开配置文件，暂时只有这一个写在类中，因为要在导入配置的地方模拟触发
 
     void        initTranslate(); //加载翻译文件
     QTranslator translator;

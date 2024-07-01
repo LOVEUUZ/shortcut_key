@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 
+
 using json = nlohmann::json;
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
   ui.setupUi(this);
-
 
   initDefaultConfigFile();
   initTranslate();
@@ -168,7 +168,7 @@ void MainWindow::initMenu() {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
 
     // 在文件菜单中添加动作
-    QAction* openFileAction = new QAction(tr("&Open File"), this);
+    openFileAction = new QAction(tr("&Open File"), this);
     openFileAction->setIcon(QIcon(":/res/Resource/open file.svg"));
     fileMenu->addAction(openFileAction);
 
@@ -205,6 +205,18 @@ void MainWindow::initMenu() {
 
     fileMenu->addSeparator(); // 添加分隔符
 
+    //导出配置
+    QAction* exportConfigAction = new QAction(tr("&Export Config"), this);
+    createAction->setIcon(QIcon(":/res/Resource/create file.svg"));
+    fileMenu->addAction(exportConfigAction);
+
+    //导入配置
+    QAction* importConfigAction = new QAction(tr("&Import Config"), this);
+    createAction->setIcon(QIcon(":/res/Resource/create file.svg"));
+    fileMenu->addAction(importConfigAction);
+
+    fileMenu->addSeparator(); // 添加分隔符
+
     QAction* exitAction = new QAction(tr("&Quit"), this);
     exitAction->setIcon(QIcon(":/res/Resource/exit.svg"));
     fileMenu->addAction(exitAction);
@@ -218,7 +230,7 @@ void MainWindow::initMenu() {
       QString filePath = QFileDialog::getOpenFileName(this, "Select the configuration file",
                                                       QApplication::applicationDirPath() + "/config/",
                                                       "Text files (*.json)");
-      if (filePath.isEmpty()) return;
+      if (filePath == nullptr || filePath.isEmpty()) return;
       qDebug() << filePath;
 
       // 获取最后一个斜杠的位置
@@ -283,6 +295,41 @@ void MainWindow::initMenu() {
           break;
         }
       }
+    });
+
+    //导出配置
+    connect(exportConfigAction, &QAction::triggered, [&]() {
+      //1.选择导出位置
+      QString exportDir = QFileDialog::getExistingDirectory(this, tr("Select the export position"), QDir::homePath());
+      if (exportDir == nullptr || exportDir.isEmpty()) return;
+      //2.获取现配置文件夹
+      QString configPath = QApplication::applicationDirPath() + "/config/";
+      if (!std::filesystem::exists(configPath.toStdString())) {
+        //2.1 如何现有配置文件不存在，则终止,提示进行手动移动配置文件
+        QMessageBox::warning(this, tr("warning"),
+                             tr(
+                               "Unable to export the file, please press the following prompts to operate:  "
+                               "Find the program EXE directory, select the Config folder, copy and save all the files, move it to the config folder on the new machine"));
+        qWarning() << "导出配置文件失败，原因: 文件或文件夹不存在";
+        return;
+      }
+      //3.获取配置文件夹中的所有文件，压缩，将生成的压缩包放在导出位置
+      exportDir = exportDir + "/config.jnf";
+      Tools::compressFolder(configPath, exportDir);
+      QMessageBox::information(this, tr("success"), tr("The export is successful, the path is:") + exportDir);
+      qInfo() << "导出配置文件成功，路径为:" + exportDir;
+    });
+
+    //导入配置
+    connect(importConfigAction, &QAction::triggered, [&]() {
+      //1.选择文件位置
+      QString configFilePath = QFileDialog::getOpenFileName(this, tr("Select file position"), QDir::homePath(), "config File (*.jnf)");
+      //2.解压到指定位置
+      Tools::decompressFolder(configFilePath, QApplication::applicationDirPath() + "/config/");
+      QMessageBox::information(this, tr("success"), tr("Please re -select the configuration file for enabled"));
+      qInfo() << "导入配置文件成功";
+      //3.自动弹出配置选择
+      openFileAction->triggered();
     });
 
     //设置为开机启动/取消开机启动

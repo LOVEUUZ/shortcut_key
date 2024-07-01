@@ -39,6 +39,12 @@
     <Filter Include="Header Files\core">
       <UniqueIdentifier>{35c3ff02-7203-4be4-91dd-71d7dae9ade5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\tools">
+      <UniqueIdentifier>{0c27a2d9-5c4d-483f-989b-bef7463e86ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tools">
+      <UniqueIdentifier>{e65d6c37-1724-483f-b457-ee6ac15b4005}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="mainwindow.ui">
@@ -82,6 +88,9 @@
     <ClCompile Include="logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tools.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="my_dialog_accept_filepath.h">
@@ -105,6 +114,9 @@
     <QtMoc Include="Trigger.hpp">
       <Filter>Source Files\Component</Filter>
     </QtMoc>
+    <QtMoc Include="tools.h">
+      <Filter>Header Files\tools</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp">
@@ -118,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="startQuickly.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="quazip.h">
+      <Filter>Header Files\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

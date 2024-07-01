@@ -37,12 +37,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.4.3_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;xml</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.4.3_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;xml</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -60,13 +60,30 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>
+    </IncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>
+    </IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
+      <PreprocessorDefinitions>QUAZIP_QT_ZLIB_USED=ON;BUILD_SHARED_LIBS=OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
@@ -104,6 +121,7 @@
     <ClCompile Include="my_lineedit_exe_path.cpp" />
     <ClCompile Include="startQuickly.cpp" />
     <ClCompile Include="substyleditemdelegate.cpp" />
+    <ClCompile Include="tools.cpp" />
     <ClCompile Include="WindowsHookEx.cpp" />
     <QtRcc Include="Resource.qrc" />
     <QtUic Include="mainwindow.ui" />
@@ -123,7 +141,9 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="keyEvent.h" />
     <QtMoc Include="logger.h" />
+    <ClInclude Include="quazip.h" />
     <ClInclude Include="startQuickly.h" />
+    <QtMoc Include="tools.h" />
     <ClInclude Include="WindowsHookEx.h" />
     <QtMoc Include="my_dialog_key_input.h" />
     <QtMoc Include="Trigger.hpp" />
