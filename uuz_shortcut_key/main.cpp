@@ -11,6 +11,12 @@
 #include "mainwindow.h"
 #include "startQuickly.h"
 
+#include <QApplication>
+#include <QFileIconProvider>
+#include <QLabel>
+#include <QPixmap>
+#include <QVBoxLayout>
+#include <QWidget>
 
 //程序启动互斥体
 HANDLE hMutex;
@@ -44,6 +50,7 @@ int main(int argc, char* argv[]) {
 
 
   StartQuickly* start_quickly_1 = StartQuickly::getStartQuickly();
+
 
   MainWindow w;
   globalVar = &w;

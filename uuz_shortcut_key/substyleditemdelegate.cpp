@@ -57,14 +57,19 @@ QWidget* sub_styled_item_delegate::createEditor(QWidget*            parent, cons
 
   //触发次数列
   if (index.column() == 8) {
-    QComboBox* comboBox = new QComboBox(parent);
+
+      // QComboBox* comboBox = nullptr;
+    comboBox = new QComboBox(parent);
     comboBox->addItem(ptr_trigger->str_once_click, ptr_trigger->strToType(ptr_trigger->str_once_click));
     comboBox->addItem(ptr_trigger->str_double_click, ptr_trigger->strToType(ptr_trigger->str_double_click));
     comboBox->addItem(ptr_trigger->str_triple_click, ptr_trigger->strToType(ptr_trigger->str_triple_click));
 
+    comboBox->setCurrentText("");
+
     //该函数被const修饰，无法发送信号commitData和closeEditor 所以要const_cast解开
     connect(comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), const_cast<sub_styled_item_delegate*>(this),
             [&](int type) {
+            comboBox->setCurrentText(" ");
               QWidget* editor = qobject_cast<QWidget*>(sender());
               emit const_cast<sub_styled_item_delegate*>(this)->commitData(editor);
               emit const_cast<sub_styled_item_delegate*>(this)->closeEditor(editor, QAbstractItemDelegate::NoHint);

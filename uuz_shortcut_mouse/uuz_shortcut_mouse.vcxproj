@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E44E224A-93AD-4AF6-80A3-0614AF473174}</ProjectGuid>
+    <ProjectGuid>{16C094E2-441D-493E-A177-C89A45114A1A}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
@@ -37,12 +37,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.7.2</QtInstall>
-    <QtModules>core;gui;widgets;xml</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.4.3_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets;xml</QtModules>
+    <QtInstall>6.7.2</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -60,31 +60,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>
-    </IncludePath>
-    <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>
-    </IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <LanguageStandard>$(Qt_STDCPP_)</LanguageStandard>
-      <PreprocessorDefinitions>QUAZIP_QT_ZLIB_USED=ON;BUILD_SHARED_LIBS=OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Link>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -114,47 +92,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="keyEvent.cpp" />
-    <ClCompile Include="logger.cpp" />
-    <ClCompile Include="my_dialog_accept_filepath.cpp" />
-    <ClCompile Include="my_dialog_key_input.cpp" />
-    <ClCompile Include="my_lineedit_exe_path.cpp" />
-    <ClCompile Include="startQuickly.cpp" />
-    <ClCompile Include="substyleditemdelegate.cpp" />
-    <ClCompile Include="tools.cpp" />
-    <ClCompile Include="WindowsHookEx.cpp" />
-    <QtRcc Include="Resource.qrc" />
-    <QtUic Include="mainwindow.ui" />
-    <QtMoc Include="mainwindow.h" />
-    <ClCompile Include="mainwindow.cpp" />
-    <ClCompile Include="main.cpp">
-      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
-      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
-      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
-      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
-    </ClCompile>
+    <QtRcc Include="mainwidget.qrc" />
+    <QtUic Include="icon_button.ui" />
+    <QtUic Include="mainwidget.ui" />
+    <QtMoc Include="mainwidget.h" />
+    <ClCompile Include="IconButton.cpp" />
+    <ClCompile Include="mainwidget.cpp" />
+    <ClCompile Include="main.cpp" />
+    <None Include="uuz_shortcut_mouse.ico" />
+    <ResourceCompile Include="uuz_shortcut_mouse.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="my_lineedit_exe_path.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="json.hpp" />
-    <ClInclude Include="keyEvent.h" />
-    <QtMoc Include="logger.h" />
-    <ClInclude Include="startQuickly.h" />
-    <QtMoc Include="tools.h" />
-    <ClInclude Include="WindowsHookEx.h" />
-    <QtMoc Include="my_dialog_key_input.h" />
-    <QtMoc Include="Trigger.hpp" />
-    <QtMoc Include="substyleditemdelegate.h" />
-    <QtMoc Include="my_dialog_accept_filepath.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\README.md" />
-    <None Include="uuz_zh_CN.qm" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtTranslation Include="uuz_zh_CN.ts" />
+    <ClInclude Include="..\uuz_shortcut_key\json.hpp" />
+    <QtMoc Include="iconButton.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

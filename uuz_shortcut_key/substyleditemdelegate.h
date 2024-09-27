@@ -8,6 +8,7 @@ class sub_styled_item_delegate : public QStyledItemDelegate {
     Q_OBJECT
 
     mutable QString tmp_new_path; //可变
+    mutable QComboBox* comboBox = nullptr;
 
   public:
     sub_styled_item_delegate(QObject* parent);
