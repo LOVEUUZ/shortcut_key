@@ -52,6 +52,9 @@
     <ClCompile Include="IconButton.cpp">
       <Filter>Source Files\Component</Filter>
     </ClCompile>
+    <ClCompile Include="icons_inner_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\uuz_shortcut_key\json.hpp">
@@ -62,9 +65,15 @@
     <QtMoc Include="iconButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="icons_inner_widget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="icon_button.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="icons_inner_widget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

@@ -1,45 +1,42 @@
 #pragma once
 
-#include <QPushButton>
-#include <QLabel>
-#include <QFileInfo>
+#include <QToolButton>
 #include <QFileIconProvider>
-#include <QPainter>
-// #include <Shlwapi.h>
-#include <QMouseEvent>
-#include <QProcess>
 #include <QDesktopServices>
 #include <QDir>
+#include <QVector>
+#include <QMouseEvent>
 
-#include "ui_icon_button.h"
+class IconButton : public QToolButton {
+    Q_OBJECT
 
-class IconButton : public QPushButton
-{
-	Q_OBJECT
+  public:
+    IconButton(QWidget* parent, QVector<QPair<int, int>> & vec, QString filePath = "");
+    ~IconButton();
 
-public:
-	IconButton(QWidget* parent = nullptr);
-	~IconButton();
+  protected:
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
 
-private:
-	// Ui::icon_buttonClass ui;
-	// void init_rendering();
-
-
-	void paintEvent(QPaintEvent* event) override;
-	void mousePressEvent(QMouseEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
-	void mouseReleaseEvent(QMouseEvent* event) override;
-
-	static void openFile(QString& filePath);
-	void updateIcon(const QString& filePath);
+  private:
+    void        init_icon(const QString & filePath);
+    static void openFile(const QString & filePath);
+    void        updateIcon(const QString & filePath);
+    int         calculateClosestIndex(const QPoint & pos);
 
 
-	QLabel* iconLabel;
-	QString filePath;
-	QIcon m_icon;
-	QString m_text;
-	QPixmap m_cachedIcon; // 缓存的图标
+    static QVector<QPair<int, int>> vec_coordinate;
 
-	bool is_move;
+    QString     filePath;
+    QIcon       m_icon; // 文件图标
+    static int  iconSize;
+    static bool is_moving;    // 是否在移动
+    QPoint      dragStartPos; //移动坐标
+    QPoint      originalPos;  // 存储未被拖动前的位置
+
+  signals:
+    void buttonDragged(bool is_moving);
 };
