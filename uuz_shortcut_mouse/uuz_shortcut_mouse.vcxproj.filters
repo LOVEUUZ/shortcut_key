@@ -24,6 +24,9 @@
     <Filter Include="Source Files\Component">
       <UniqueIdentifier>{4c3a1ac9-e4be-481b-867c-e0448d39e2c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Component">
+      <UniqueIdentifier>{a407e7fe-1c98-406e-977c-f48a61faf501}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="mainwidget.qrc">
@@ -55,18 +58,33 @@
     <ClCompile Include="icons_inner_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Everything.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\uuz_shortcut_key\json.hpp">
+    <ClInclude Include="Everything.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="everything_ipc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
       <Filter>Source Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header Files\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="iconButton.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="icons_inner_widget.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="iconButton.h">
+      <Filter>Header Files\Component</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

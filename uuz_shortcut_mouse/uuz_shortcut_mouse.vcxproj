@@ -36,7 +36,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.7.3_msvc2019_64</QtInstall>
+    <QtInstall>6.4.3</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
@@ -63,6 +63,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <AdditionalDependencies>Ole32.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -97,6 +102,8 @@
     <QtUic Include="icon_button.ui" />
     <QtUic Include="mainwidget.ui" />
     <QtMoc Include="mainwidget.h" />
+    <ClCompile Include="config.cpp" />
+    <ClCompile Include="Everything.c" />
     <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="icons_inner_widget.cpp" />
     <ClCompile Include="mainwidget.cpp" />
@@ -105,7 +112,10 @@
     <ResourceCompile Include="uuz_shortcut_mouse.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\uuz_shortcut_key\json.hpp" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="Everything.h" />
+    <ClInclude Include="everything_ipc.h" />
+    <ClInclude Include="json.hpp" />
     <QtMoc Include="icons_inner_widget.h" />
     <QtMoc Include="iconButton.h" />
   </ItemGroup>

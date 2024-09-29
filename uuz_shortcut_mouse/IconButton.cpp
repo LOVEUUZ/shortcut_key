@@ -1,135 +1,173 @@
-#include "IconButton.h"
+ï»¿#include "IconButton.h"
 
-int                      IconButton::iconSize  = 64;
+#include <utility>
+
+#include "icons_inner_widget.h"
+
+int                      IconButton::iconSize = 64;
 bool                     IconButton::is_moving = false;
-QVector<QPair<int, int>> IconButton::vec_coordinate;
 
-IconButton::IconButton(QWidget* parent, QVector<QPair<int, int>> & vec, QString filePath) : QToolButton(parent),
-  filePath(filePath) {
-  // filePath = "D:/software/PDF/FoxitPDFEditor2024/FoxitPDFEditor.exe";
-  vec_coordinate = vec;
 
-  init_icon(filePath);
+IconButton::IconButton(QWidget* parent, const Config config) : QToolButton(parent),config(config) {
 
-  // ÉèÖÃÍ¸Ã÷±³¾°£¬Ö»ÏÔÊ¾Í¼±êºÍÎÄ×Ö
-  setAttribute(Qt::WA_TranslucentBackground, true);
-  setStyleSheet("QToolButton { background: transparent; border: none; }");
+	this->ID = config.id;
+	this->filePath = QString::fromUtf8(config.fileName);
+
+	parentWidget_content = dynamic_cast<Icons_inner_widget*>(parentWidget());
+	vec_coordinate = parentWidget_content->get_vec_coordinate();
+	map_index_button = parentWidget_content->get_map_index_button();
+
+	init_icon(filePath);
+
+	// è®¾ç½®é€æ˜èƒŒæ™¯ï¼Œåªæ˜¾ç¤ºå›¾æ ‡å’Œæ–‡å­—
+	setAttribute(Qt::WA_TranslucentBackground, true);
+	setStyleSheet("QToolButton { background: transparent; border: none; }");
 }
+
 
 IconButton::~IconButton() {}
 
-void IconButton::init_icon(const QString & filePath) {
-  QFileIconProvider iconProvider;
-  QIcon             fileIcon = iconProvider.icon(QFileInfo(filePath));
-  QPixmap           iconPixmap = fileIcon.pixmap(iconSize, iconSize); // »ñÈ¡Í¼±ê²¢ÉèÖÃ´óĞ¡
-  m_icon = QIcon(iconPixmap.scaled(iconSize, iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation)); // Ëõ·ÅÍ¼±ê
 
-  // ÉèÖÃÍ¼±êºÍÑùÊ½
-  setIcon(m_icon);
-  setIconSize(QSize(iconSize, iconSize));
-  setText("QQ");
-  setToolButtonStyle(Qt::ToolButtonTextUnderIcon); // Í¼±êÔÚÎÄ×ÖÉÏ·½
-  setStyleSheet("QToolButton { background-color: #b7b7b7; border: 1px solid #888; border-radius: 5px; }");
+void IconButton::init_icon(const QString& filePath) {
+	QFileInfo fileInfo(filePath);
+	QString resolvedPath = filePath;
+
+	// æ£€æŸ¥æ˜¯å¦æ˜¯å¿«æ·æ–¹å¼,å¦‚æœæ˜¯åˆ™è¿”å›çœŸå®è·¯å¾„z
+	QFileInfo shortcutInfo(filePath);
+	if (shortcutInfo.isSymLink()) {
+
+		resolvedPath = shortcutInfo.symLinkTarget();
+	}
+
+	QFileIconProvider iconProvider;
+	QIcon fileIcon = iconProvider.icon(QFileInfo(resolvedPath));
+	QPixmap iconPixmap = fileIcon.pixmap(iconSize, iconSize); // è·å–å›¾æ ‡å¹¶è®¾ç½®å¤§å°
+	m_icon = QIcon(iconPixmap.scaled(iconSize, iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation)); // ç¼©æ”¾å›¾æ ‡
+
+	// è®¾ç½®å›¾æ ‡å’Œæ ·å¼
+	setIcon(m_icon);
+	setIconSize(QSize(iconSize, iconSize));
+	qDebug() << "åå­— ==ã€‹ " << QString::fromUtf8(config.fileName);
+	setText(QString::fromUtf8(config.fileName));
+	setToolButtonStyle(Qt::ToolButtonTextUnderIcon); // å›¾æ ‡åœ¨æ–‡å­—ä¸Šæ–¹
+	setStyleSheet("QToolButton { background-color: #b7b7b7; border: 1px solid #888; border-radius: 5px; }");
 }
 
+
+//æŒ‰ä¸‹äº‹ä»¶
 void IconButton::mousePressEvent(QMouseEvent* event) {
-  if (event->button() == Qt::LeftButton) {
-    originalPos = pos(); // ¼ÇÂ¼³õÊ¼Î»ÖÃ
-    // Ìí¼Ó°´ÏÂĞ§¹û£¬¸Ä±äÑùÊ½
-    setStyleSheet("QToolButton { background-color: #a0a0a0; border: 1px solid #666; border-radius: 5px; }");
-    dragStartPos = event->pos();
-    setCursor(Qt::ClosedHandCursor);
-  }
-  QToolButton::mousePressEvent(event);
+	if (event->button() == Qt::LeftButton) {
+		originalPos = pos(); // è®°å½•åˆå§‹ä½ç½®
+		// æ·»åŠ æŒ‰ä¸‹æ•ˆæœï¼Œæ”¹å˜æ ·å¼
+		setStyleSheet("QToolButton { background-color: #a0a0a0; border: 1px solid #666; border-radius: 5px; }");
+		dragStartPos = event->pos();
+		setCursor(Qt::ClosedHandCursor);
+	}
+	QToolButton::mousePressEvent(event);
 }
 
+//é‡Šæ”¾äº‹ä»¶
 void IconButton::mouseReleaseEvent(QMouseEvent* event) {
-  if (event->button() == Qt::LeftButton) {
-    if (is_moving) {
-      // ¼ÆËãµ±Ç°ËùÔÚµÄÇøÓò
-      QPoint globalMousePos = QCursor::pos();               //Êó±êÈ«¾Ö×ø±ê
-      QPoint localMousePos  = mapFromGlobal(globalMousePos);//×ªÎªÊó±êÎ»ÖÃÏà¶ÔÓÚ°´Å¥µÄÆ«ÒÆ
+	if (event->button() == Qt::LeftButton) {
+		if (is_moving) {
+			// è®¡ç®—å½“å‰æ‰€åœ¨çš„åŒºåŸŸ
+			QPoint globalMousePos = QCursor::pos();               //é¼ æ ‡å…¨å±€åæ ‡
+			QPoint localMousePos = mapFromGlobal(globalMousePos);//è½¬ä¸ºé¼ æ ‡ä½ç½®ç›¸å¯¹äºæŒ‰é’®çš„åç§»
 
-      QPoint currentPos   = pos() + localMousePos;
-      int    closestIndex = calculateClosestIndex(currentPos); // ¼ÆËã×î½üµÄË÷Òı
-      // ÊÊÓ¦µ½ĞÂÎ»ÖÃ
-      if (closestIndex != -1) {
-        QPoint newCoordinate = QPoint(vec_coordinate[closestIndex].first, vec_coordinate[closestIndex].second);
-        move(newCoordinate); // ÒÆ¶¯µ½ĞÂµÄ×ø±ê
-      }
-    }
-    else {
-      openFile(filePath); // ´ò¿ª¶ÔÓ¦³ÌĞò
-    }
-    // »Ö¸´ÑùÊ½
-    setStyleSheet("QToolButton { background-color: #b7b7b7; border: 1px solid #888; border-radius: 5px; }");
-    setCursor(Qt::ArrowCursor);
-    is_moving = false; // ×´Ì¬ÖØÖÃ
-  }
-  QToolButton::mouseReleaseEvent(event);
+			QPoint currentPos = pos() + localMousePos;
+			int    closestIndex = calculateClosestIndex(currentPos); // è®¡ç®—æœ€è¿‘çš„ç´¢å¼•
+			// qDebug() << map_index_button;
+			// é€‚åº”åˆ°æ–°ä½ç½®
+			if (closestIndex != -1) {
+				QPoint newCoordinate = QPoint(vec_coordinate->at(closestIndex).first, vec_coordinate->at(closestIndex).second);
+				move(newCoordinate); // ç§»åŠ¨åˆ°æ–°çš„åæ ‡
+				//æ”¾ç½®åˆ°æ–°ä½ç½®åï¼Œæ›´æ–°ç´¢å¼•ä¸æŒ‰é’®çš„æ˜ å°„
+				qDebug() << "Removing key:" << ID;
+				map_index_button->remove(ID);
+				ID = closestIndex;
+				map_index_button->insert(closestIndex, this);
+
+			}
+			else move(originalPos);
+		}
+		else {
+			openFile(filePath); // æ‰“å¼€å¯¹åº”ç¨‹åº
+		}
+		// æ¢å¤æ ·å¼
+		setStyleSheet("QToolButton { background-color: #b7b7b7; border: 1px solid #888; border-radius: 5px; }");
+		setCursor(Qt::ArrowCursor);
+		is_moving = false; // çŠ¶æ€é‡ç½®
+
+		// å‘å‡ºä¿¡å·é€šçŸ¥çˆ¶çª—å£éšè—è™šçº¿
+		emit buttonDragged(false);
+	}
+	QToolButton::mouseReleaseEvent(event);
 }
 
+//ç§»åŠ¨äº‹ä»¶
 void IconButton::mouseMoveEvent(QMouseEvent* event) {
-  if (event->buttons() & Qt::LeftButton) {
-    int distance = (event->pos() - dragStartPos).manhattanLength();
-    if (distance > 5) {
-      // Éè¶¨ÍÏ¶¯µÄãĞÖµ
-      is_moving = true;
+	if (event->buttons() & Qt::LeftButton) {
+		int distance = (event->pos() - dragStartPos).manhattanLength();
+		if (distance > 5) {
+			is_moving = true;
 
-      // ·¢³öĞÅºÅÍ¨Öª¸¸´°¿ÚÏÔÊ¾ĞéÏß
-      emit buttonDragged(true);
+			// å‘å‡ºä¿¡å·é€šçŸ¥çˆ¶çª—å£æ˜¾ç¤ºè™šçº¿
+			emit buttonDragged(true);
 
-      // »ñÈ¡¸¸´°¿ÚÏà¶ÔÎ»ÖÃ
-      QPoint parentPos = parentWidget()->mapFromGlobal(QCursor::pos());
-      QPoint newPos    = parentPos - QPoint(iconSize / 2, iconSize / 2);
+			// è·å–çˆ¶çª—å£ç›¸å¯¹ä½ç½®
+			QPoint parentPos = parentWidget()->mapFromGlobal(QCursor::pos());
+			QPoint newPos = parentPos - QPoint(iconSize / 2, iconSize / 2);
 
-      // ÅĞ¶ÏÊÇ·ñ³¬³ö±ß½ç
-      QRect parentRect = parentWidget()->rect();
-      if (!parentRect.contains(newPos)) {
-        move(originalPos); // ³¬³ö±ß½ç£¬»Øµ½³õÊ¼Î»ÖÃ
-        return;
-      }
+			// åˆ¤æ–­é¼ æ ‡æ˜¯å¦åœ¨çˆ¶çª—å£ä¸­
+			if (!parentWidget()->underMouse()) {
+				move(originalPos); // è¶…å‡ºè¾¹ç•Œï¼Œå›åˆ°åˆå§‹ä½ç½®
+				return;
+			}
 
-      move(newPos); // ¸üĞÂÎ»ÖÃ
-      raise();      // ÌáÉı²ã¼¶
-    }
-  }
-  QToolButton::mouseMoveEvent(event);
+			move(newPos); // æ›´æ–°ä½ç½®
+			raise();      // æå‡å±‚çº§
+		}
+	}
+	QToolButton::mouseMoveEvent(event);
 }
 
-
-//Êó±êÒÆÈëµÄÑùÊ½
+//é¼ æ ‡ç§»å…¥çš„æ ·å¼
 void IconButton::enterEvent(QEnterEvent* event) {
-  // Êó±êĞü¸¡Ê±µÄÑùÊ½
-  setStyleSheet("QToolButton { background: rgba(0, 0, 0, 0.2); border: none; }"); // ÒõÓ°Ğ§¹û
-  QToolButton::enterEvent(event);
+	// é¼ æ ‡æ‚¬æµ®æ—¶çš„æ ·å¼
+	setStyleSheet("QToolButton { background: rgba(0, 0, 0, 0.2); border: none; border-radius: 5px }"); // é˜´å½±æ•ˆæœ
+	QToolButton::enterEvent(event);
 }
 
-//Êó±êÀë¿ªµÄÑùÊ½
+//é¼ æ ‡ç¦»å¼€çš„æ ·å¼
 void IconButton::leaveEvent(QEvent* event) {
-  // Êó±êÀë¿ªÊ±µÄÑùÊ½
-  setStyleSheet("QToolButton { background: transparent; border: none; }");
-  QToolButton::leaveEvent(event);
+	// é¼ æ ‡ç¦»å¼€æ—¶çš„æ ·å¼
+	setStyleSheet("QToolButton { background: transparent; border: none; border-radius: 5px }");
+	QToolButton::leaveEvent(event);
 }
 
 
-void IconButton::openFile(const QString & filePath) {
-  QString filePath_tmp = QDir::toNativeSeparators(filePath); // ×ªÎª±¾µØ¸ñÊ½
-  QUrl    fileUrl      = QUrl::fromLocalFile(filePath_tmp);  // ×ªÎªurl
-  QDesktopServices::openUrl(fileUrl);                        // Ê¹ÓÃ¸Ãº¯Êı¿ÉÒÔ´ò¿ªexe£¬Ò²ÄÜ´ò¿ªjpg£¬txtµÈÎÄ¼ş
+void IconButton::openFile(const QString& filePath) {
+	QString filePath_tmp = QDir::toNativeSeparators(filePath); // è½¬ä¸ºæœ¬åœ°æ ¼å¼
+	QUrl    fileUrl = QUrl::fromLocalFile(filePath_tmp);  // è½¬ä¸ºurl
+	QDesktopServices::openUrl(fileUrl);                        // ä½¿ç”¨è¯¥å‡½æ•°å¯ä»¥æ‰“å¼€exeï¼Œä¹Ÿèƒ½æ‰“å¼€jpgï¼Œtxtç­‰æ–‡ä»¶
 
-  qDebug() << "Starting process:" << filePath_tmp;
+	qDebug() << "Starting process:" << filePath_tmp;
 }
 
 
-// ¼ÆËã×î½üµÄË÷Òı
-int IconButton::calculateClosestIndex(const QPoint & pos) {
-  for (int i = 0; i < vec_coordinate.size(); ++i) {
-    const auto & coordinate = vec_coordinate[i];
-    QRect        rect(coordinate.first, coordinate.second, 95, 95);
-    if (rect.contains(pos)) {
-      return i; // ·µ»Ø×î½üµÄË÷Òı
-    }
-  }
-  return -1; // Ã»ÓĞÕÒµ½
+// è®¡ç®—æœ€è¿‘çš„ç´¢å¼•
+int IconButton::calculateClosestIndex(const QPoint& pos) {
+	for (int i = 0; i < vec_coordinate->size(); ++i) {
+		const auto& coordinate = vec_coordinate->at(i);
+		QRect        rect(coordinate.first, coordinate.second, 95, 95);
+		//æ‰¾åˆ°ç›®å‰é¼ æ ‡åœç•™çš„åæ ‡ä¸ä¹‹å¯¹åº”çš„æŒ‰é’®é¢„ç•™ä½
+		if (rect.contains(pos)) {
+			//åˆ¤æ–­å½“å‰ä½ç½®ä¸Šæ˜¯å¦å·²ç»æœ‰å…¶ä»–å›¾æ ‡äº†ï¼Œå¦‚æœæœ‰ï¼Œåˆ™æ”¾å¼ƒæœ¬æ¬¡ç§»åŠ¨äº‹ä»¶
+			if (map_index_button->contains(i)) {
+				return -1;
+			}
+			return i; // è¿”å›æœ€è¿‘çš„ç´¢å¼•
+		}
+	}
+	return -1; // æ²¡æœ‰æ‰¾åˆ°
 }

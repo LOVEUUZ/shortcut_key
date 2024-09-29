@@ -1,54 +1,74 @@
-#pragma once
+ï»¿#pragma once
 
 #include <QPushButton>
 #include <QWidget>
 #include <QPainter>
+#include <QMenu>
+#include <QFileDialog>
+#include <QFile>
+#include <QStandardPaths>
+#include <QDateTime>
 
 #include "iconButton.h"
 #include "ui_icons_inner_widget.h"
+#include "config.h"
 
-class Icons_inner_widget : public QWidget
-{
+#include "json.hpp"
+
+
+class Icons_inner_widget : public QWidget {
 	Q_OBJECT
 
 public:
-	Icons_inner_widget(QWidget *parent = nullptr);
+	Icons_inner_widget(QWidget* parent = nullptr);
 	~Icons_inner_widget();
 
 private:
 	// Ui::Icons_inner_widgetClass ui;
-    void paintEvent(QPaintEvent* event) override;
+	void paintEvent(QPaintEvent* event) override;
+	void contextMenuEvent(QContextMenuEvent* event) override; //å³é”®èœå•
 
 
-    static constexpr int x = 8;
-    static constexpr int y = 4;
-    static constexpr int icon_button_size = 95;
-    static constexpr int sum = x * y;
+	static constexpr int x = 8;
+	static constexpr int y = 4;
+	static constexpr int SIZE = x * y - 1;
+	static constexpr int icon_button_size = 95;
+	static constexpr int SUM = x * y - 1;
 
-    void                   init_coordinateut(); //³õÊ¼»¯×ø±ê
-    void                   init_rendering();    //¼ì²â×ø±êÒÔ¼°äÖÈ¾·¶Î§
-    QMap<IconButton*, int> button_map;          // ´æ´¢°´Å¥ÓëË÷ÒıµÄÓ³Éä
-    QVector<IconButton*>   vec_iconButton;
+	void init_coordinateut(); //åˆå§‹åŒ–åæ ‡
+	void init_rendering();    //åˆ›å»ºå¹¶æ¸²æŸ“æŒ‰é’®
+
+	QMap<int, IconButton*> map_index_button; //å­˜å‚¨æŒ‰é’®ä¸ç´¢å¼•çš„æ˜ å°„
+	QVector<IconButton*>   vec_iconButton;   //æ¯ä¸ªæŒ‰é’®çš„æŒ‡é’ˆ
 
 
-    QPushButton* q_push_button_arr[x][y];
-    QVector<QPair<int, int>> vec_coordinate; //icon_buttonµÄ×óÉÏ½Ç×ø±ê
-    QRect                    first_icon_coordinate;
+	QPushButton* q_push_button_arr[x][y];
+	QVector<QPair<int, int>> vec_coordinate; //icon_buttonçš„å·¦ä¸Šè§’åæ ‡
+	QRect                    first_icon_coordinate;
 
-    bool is_showDashedBorder; // ÓÃÓÚ¿ØÖÆĞéÏßÏÔÊ¾
-    QWidget* overlayWidget; // Í¸Ã÷¸²¸Ç²ã
+	bool     is_showDashedBorder; // ç”¨äºæ§åˆ¶è™šçº¿æ˜¾ç¤º
 
+	//é…ç½®æ–‡ä»¶ç›¸å…³
+	QString        file_path;
+	QFile* file_config;
+	QString        qstr_config_content;
+	std::string    str_config_content;
+	nlohmann::json config_jsonArray;
+	QString        first_create_config();
+	void           init_config();
+
+public:
+	auto get_vec_coordinate() {
+		return &vec_coordinate;
+	}
+
+	auto get_map_index_button() {
+		return &map_index_button;
+	}
 
 public slots:
-    void showDashedBorder(bool is_moving) {
-        qDebug() << ".........";
-        if (is_moving) {
-            is_showDashedBorder = true; // ÉèÖÃ±êÖ¾Î»
-            update();                   // ¸üĞÂ½çÃæ
-        }
-        else {
-            is_showDashedBorder = false; // ÉèÖÃ±êÖ¾Î»
-            update();                    // ¸üĞÂ½çÃæ
-        }
-    }
+	void slot_showDashedBorder(bool is_moving); //æ‹–æ‹½çš„æ—¶å€™æ˜¾ç¤ºè™šçº¿å’Œéšè—
+	void slot_add_icon();                       //å³é”®æ·»åŠ icon
+	void slot_delete_icon(int id);              //å³é”®åˆ é™¤icon
+	void slot_config();                         //å³é”®æ‰“å¼€é…ç½®ï¼Œè¿˜æœªç”¨åˆ°
 };
