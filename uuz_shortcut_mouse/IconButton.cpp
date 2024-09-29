@@ -11,7 +11,7 @@ bool                     IconButton::is_moving = false;
 IconButton::IconButton(QWidget* parent, const Config config) : QToolButton(parent),config(config) {
 
 	this->ID = config.id;
-	this->filePath = QString::fromUtf8(config.fileName);
+	this->filePath = QString::fromUtf8(config.absolutePath);
 
 	parentWidget_content = dynamic_cast<Icons_inner_widget*>(parentWidget());
 	vec_coordinate = parentWidget_content->get_vec_coordinate();
@@ -150,6 +150,10 @@ void IconButton::openFile(const QString& filePath) {
 	QString filePath_tmp = QDir::toNativeSeparators(filePath); // 转为本地格式
 	QUrl    fileUrl = QUrl::fromLocalFile(filePath_tmp);  // 转为url
 	QDesktopServices::openUrl(fileUrl);                        // 使用该函数可以打开exe，也能打开jpg，txt等文件
+
+	// 如果需要打开文件所在的文件夹
+	// QUrl folderUrl = QUrl::fromLocalFile(QFileInfo(filePath_tmp).absolutePath());
+	// QDesktopServices::openUrl(folderUrl); // 打开文件夹
 
 	qDebug() << "Starting process:" << filePath_tmp;
 }

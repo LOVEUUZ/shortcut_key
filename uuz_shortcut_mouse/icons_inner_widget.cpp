@@ -244,6 +244,7 @@ void Icons_inner_widget::slot_add_icon() {
 
 			IconButton* tmp_qb = new IconButton(this, config);
 			tmp_qb->setGeometry(vec_coordinate[i].first, vec_coordinate[i].second, icon_button_size, icon_button_size);
+			tmp_qb->show();
 			map_index_button[i] = tmp_qb;
 			vec_iconButton.push_back(std::move(tmp_qb)); // 将按钮添加到 vec_iconButton
 			return;
