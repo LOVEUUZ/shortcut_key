@@ -27,6 +27,12 @@
     <Filter Include="Header Files\Component">
       <UniqueIdentifier>{a407e7fe-1c98-406e-977c-f48a61faf501}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\window">
+      <UniqueIdentifier>{4b6be82e-e149-4893-b955-98ca70c78cee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\window">
+      <UniqueIdentifier>{b06aaa61-e970-4c8d-be61-6007d93a54d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="mainwidget.qrc">
@@ -52,39 +58,48 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IconButton.cpp">
-      <Filter>Source Files\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="icons_inner_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Everything.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="config.cpp">
       <Filter>Source Files\Component</Filter>
     </ClCompile>
+    <ClCompile Include="Everything.c">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="IconButton.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="icons_inner_widget.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="search_content.cpp">
+      <Filter>Header Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="search_content.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Everything.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="everything_ipc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Source Files\Component</Filter>
     </ClInclude>
     <ClInclude Include="config.h">
       <Filter>Header Files\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Everything.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="everything_ipc.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="icons_inner_widget.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="iconButton.h">
-      <Filter>Header Files\Component</Filter>
+      <Filter>Header Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="icons_inner_widget.h">
+      <Filter>Header Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="search_content.h">
+      <Filter>Header Files\window</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +107,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="icons_inner_widget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="search_content.ui">
+      <Filter>Header Files\window</Filter>
+    </QtUic>
+    <QtUic Include="search_content.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

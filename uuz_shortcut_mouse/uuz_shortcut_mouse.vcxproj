@@ -72,7 +72,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -97,6 +97,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="search_content.cpp" />
     <QtRcc Include="mainwidget.qrc" />
     <QtUic Include="icons_inner_widget.ui" />
     <QtUic Include="icon_button.ui" />
@@ -109,6 +110,7 @@
     <ClCompile Include="mainwidget.cpp" />
     <ClCompile Include="main.cpp" />
     <None Include="uuz_shortcut_mouse.ico" />
+    <QtUic Include="search_content.ui" />
     <ResourceCompile Include="uuz_shortcut_mouse.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +118,7 @@
     <ClInclude Include="Everything.h" />
     <ClInclude Include="everything_ipc.h" />
     <ClInclude Include="json.hpp" />
+    <QtMoc Include="search_content.h" />
     <QtMoc Include="icons_inner_widget.h" />
     <QtMoc Include="iconButton.h" />
   </ItemGroup>

@@ -4,7 +4,6 @@
 #include <QFileIconProvider>
 #include <QDesktopServices>
 #include <QDir>
-#include <QVector>
 #include <QMouseEvent>
 
 #include "config.h"

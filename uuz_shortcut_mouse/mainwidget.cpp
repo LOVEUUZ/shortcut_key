@@ -1,4 +1,4 @@
-#include "mainwidget.h"
+ï»¿#include "mainwidget.h"
 
 #include <iostream>
 #include <QLineEdit>
@@ -9,69 +9,87 @@
 #include <QPainter>
 #include <QPainterPath>
 
-MainWidget::MainWidget(QWidget* parent)
-	: QWidget(parent)
-{
-	// ui.setupUi(this);
-	setObjectName("mainWidget");
-	// setWindowFlags(Qt::FramelessWindowHint);
-	init_layout();
+MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
+  // ui.setupUi(this);
+  setObjectName("mainWidget");
+  // setWindowFlags(Qt::FramelessWindowHint);
 
+  init_layout();
 
+  init_search_line();
 
-	setStyleSheet("MainWidget{background-color: #b7b7b7;} ");
-
-
-	
-
+  // setStyleSheet("MainWidget{background-color: #b7b7b7;} ");
 }
 
-MainWidget::~MainWidget()
-{
+MainWidget::~MainWidget() {}
 
+
+void MainWidget::init_search_line() {
+  connect(search_line, &QLineEdit::textChanged, search_inner_widget, &Search_content::slot_text_change);
+  //æŽ§åˆ¶ stacked_widget æ˜¾ç¤ºä¸º search_inner_widget
+  connect(search_line, &QLineEdit::textChanged, this, [this]() {
+    QString text  = this->search_line->text();
+
+    int     index = 0;
+    if (text.isEmpty()) index = 0;  // æ–‡æœ¬ä¸ºç©ºï¼Œæ˜¾ç¤º  icons_inner_widget å›¾æ ‡æ˜¾ç¤ºçª—å£
+    else index = 1; // æ˜¾ç¤ºä¸º search_inner_widget æœç´¢å†…å®¹çª—å£
+
+    slot_show_stackedWidget_index(index);
+  });
 }
 
 
-
-// ÉèÖÃ²¼¾Ö
+// è®¾ç½®å¸ƒå±€
 void MainWidget::init_layout() {
-	// 1. ´´½¨Ö÷²¼¾Ö²¢ÉèÖÃÎÞ±ß¾à
-	v_search_and_grid = new QVBoxLayout(this);
-	v_search_and_grid->setContentsMargins(0, 0, 0, 0); // ÉèÖÃÖ÷²¼¾ÖÎÞ±ß¾à
-	setLayout(v_search_and_grid);
+  // 1. åˆ›å»ºä¸»å¸ƒå±€å¹¶è®¾ç½®æ— è¾¹è·
+  v_search_and_grid = new QVBoxLayout(this);
+  v_search_and_grid->setContentsMargins(0, 0, 0, 0); // è®¾ç½®ä¸»å¸ƒå±€æ— è¾¹è·
+  setLayout(v_search_and_grid);
 
-	// 2. ´´½¨ÉÏ²¿´¹Ö±²¼¾Ö£¬²¢ÉèÖÃ±ß¾àºÍ¼ä¾à
-	topLayout = new QVBoxLayout();
-	topLayout->setContentsMargins(5, 5, 5, 0); // ÉèÖÃÉÏ²¿²¼¾ÖÓëËÄÖÜµÄ¾àÀë
-	topLayout->setSpacing(5); // ÉèÖÃÉÏ²¿²¼¾ÖÄÚ²¿×é¼þ¼ä¾àÎª5
+  // 2. åˆ›å»ºä¸Šéƒ¨åž‚ç›´å¸ƒå±€ï¼Œå¹¶è®¾ç½®è¾¹è·å’Œé—´è·
+  topLayout = new QVBoxLayout();
+  topLayout->setContentsMargins(5, 5, 5, 0); // è®¾ç½®ä¸Šéƒ¨å¸ƒå±€ä¸Žå››å‘¨çš„è·ç¦»
+  topLayout->setSpacing(5);                  // è®¾ç½®ä¸Šéƒ¨å¸ƒå±€å†…éƒ¨ç»„ä»¶é—´è·ä¸º5
 
-	search_line = new QLineEdit(this);
-	search_line->setFixedSize(800, 60); // ÉèÖÃÉÏ²¿ QLineEdit µÄ¹Ì¶¨¸ß¶ÈÎª60
-	search_line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed); // ÉèÖÃÎª¿ÉÀ©Õ¹£¬¿í¶È¿ÉÒÔÌîÂú
+  search_line = new QLineEdit(this);
+  search_line->setFixedSize(800, 60);                                     // è®¾ç½®ä¸Šéƒ¨ QLineEdit çš„å›ºå®šé«˜åº¦ä¸º60
+  search_line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed); // è®¾ç½®ä¸ºå¯æ‰©å±•ï¼Œå®½åº¦å¯ä»¥å¡«æ»¡
 
-	topLayout->addWidget(search_line);
+  topLayout->addWidget(search_line);
 
-	// 3. ´´½¨ÏÂ²¿Õ¤¸ñ²¼¾Ö£¬²¢ÉèÖÃ±ß¾àºÍ¼ä¾à
-	icons_widget = new QWidget(this);
-	icons_widget->setFixedSize(800, 400);
+  // 3. ä¸‹åŠéƒ¨åˆ†å¸ƒå±€ï¼Œå¹¶è®¾ç½®è¾¹è·å’Œé—´è·
+  stacked_widget = new QStackedWidget(this);
+  stacked_widget->setFixedSize(800, 400);
+  stacked_widget->setContentsMargins(10, 5, 5, 10); // è®¾ç½®å†…è¾¹è·
 
-	iconsLayout = new QVBoxLayout(icons_widget);
-	iconsLayout->setContentsMargins(10, 5, 5, 10); // ÉèÖÃÄÚ±ß¾à
-	iconsLayout->setSpacing(0); // ÉèÖÃ¼ä¾àÎª0
+  iconsLayout = new QVBoxLayout(stacked_widget);
+  iconsLayout->setContentsMargins(10, 5, 5, 10); // è®¾ç½®å†…è¾¹è·
+  iconsLayout->setSpacing(0);                    // è®¾ç½®é—´è·ä¸º0
 
-	// 4. ´´½¨ÄÚ²¿ widget ²¢ÉèÖÃ´óÐ¡ºÍÑÕÉ«
-	icons_inner_widget = new Icons_inner_widget(icons_widget);
-	// icons_inner_widget->setStyleSheet("background-color: #fff111;"); // ÉèÖÃ±³¾°ÑÕÉ«
-	icons_inner_widget->setContentsMargins(5, 5, 5, 5);
+  // 4. åˆ›å»ºå†…éƒ¨ widget å¹¶è®¾ç½®å¤§å°å’Œé¢œè‰²,æ·»åŠ è¿›å…¥æ ˆçª—å£æ˜¾ç¤º
+  icons_inner_widget = new Icons_inner_widget(stacked_widget);
+  // icons_inner_widget->setStyleSheet("background-color: #123456;"); // è®¾ç½®èƒŒæ™¯é¢œè‰²
+  // icons_inner_widget->setContentsMargins(5, 5, 5, 5);
+  // iconsLayout->addWidget(icons_inner_widget); // æ·»åŠ åˆ°å¸ƒå±€ä¸­
 
-	iconsLayout->addWidget(icons_inner_widget); // Ìí¼Óµ½²¼¾ÖÖÐ
+  search_inner_widget = new Search_content(stacked_widget);
+  // search_inner_widget->setStyleSheet("background-color: red;"); // è®¾ç½®èƒŒæ™¯é¢œè‰²
+  // search_inner_widget->setContentsMargins(5, 5, 5, 5);
+  // iconsLayout->addWidget(search_inner_widget); // æ·»åŠ åˆ°å¸ƒå±€ä¸­
 
-	// 5. Ìí¼ÓÉÏ²¿ºÍÏÂ²¿²¼¾Öµ½Ö÷²¼¾Ö
-	v_search_and_grid->addLayout(topLayout); // ½«ÉÏ²¿²¼¾ÖÌí¼Óµ½Ö÷²¼¾Ö
-	v_search_and_grid->addWidget(icons_widget); // ½«ÏÂ²¿widgetÌí¼Óµ½Ö÷²¼¾Ö
+  stacked_widget->addWidget(icons_inner_widget);
+  stacked_widget->addWidget(search_inner_widget);
 
-	// ×Ô¶¯µ÷Õû´°¿Ú´óÐ¡
-	adjustSize(); // µ÷Õû´°¿Ú´óÐ¡ÒÔÊÊÓ¦ÄÚÈÝ
-	setFixedSize(size()); // ½«µ±Ç°´óÐ¡ÉèÖÃÎª¹Ì¶¨´óÐ¡
+
+  // 5. æ·»åŠ ä¸Šéƒ¨å’Œä¸‹éƒ¨å¸ƒå±€åˆ°ä¸»å¸ƒå±€
+  v_search_and_grid->addLayout(topLayout);      // å°†ä¸Šéƒ¨å¸ƒå±€æ·»åŠ åˆ°ä¸»å¸ƒå±€
+  v_search_and_grid->addWidget(stacked_widget); // å°†ä¸‹éƒ¨widgetæ·»åŠ åˆ°ä¸»å¸ƒå±€
+
+  // è‡ªåŠ¨è°ƒæ•´çª—å£å¤§å°
+  adjustSize();         // è°ƒæ•´çª—å£å¤§å°ä»¥é€‚åº”å†…å®¹
+  setFixedSize(size()); // å°†å½“å‰å¤§å°è®¾ç½®ä¸ºå›ºå®šå¤§å°
 }
 
+void MainWidget::slot_show_stackedWidget_index(const int index) const {
+    stacked_widget->setCurrentIndex(index);
+}

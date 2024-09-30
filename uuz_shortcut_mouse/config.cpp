@@ -26,11 +26,11 @@ json Config::toJson() const {
 Config Config::fromJson(const json& j) {
 	Config config;
 	config.id = j.at("id").get<int>();
-	config.fileName = j.at("fileName").get<string>();
-	config.showName = j.at("showName").get<string>();
-	config.absolutePath = j.at("absolutePath").get<string>();
-	config.creationTime = j.at("creationTime").get<string>();
-	config.lastMoveTime = j.at("lastMoveTime").get<string>();
+	config.fileName = j.at("fileName").get<std::string>();
+	config.showName = j.at("showName").get<std::string>();
+	config.absolutePath = j.at("absolutePath").get<std::string>();
+	config.creationTime = j.at("creationTime").get<std::string>();
+	config.lastMoveTime = j.at("lastMoveTime").get<std::string>();
 	config.coordinate = Coordinate::fromJson(j.at("coordinate"));
 	// config.count = j.at("count").get<int>();
 	return config;
