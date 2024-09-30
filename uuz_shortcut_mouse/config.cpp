@@ -13,11 +13,12 @@ json Config::toJson() const {
 	return json{
 		{"id", id},
 		{"fileName", fileName},
+		{"showName", showName},
 		{"absolutePath", absolutePath},
 		{"creationTime", creationTime},
 		{"lastMoveTime", lastMoveTime},
 		{"coordinate", coordinate.toJson()},
-		{"count", count}
+		// {"count", count}
 	};
 }
 
@@ -26,10 +27,11 @@ Config Config::fromJson(const json& j) {
 	Config config;
 	config.id = j.at("id").get<int>();
 	config.fileName = j.at("fileName").get<string>();
+	config.showName = j.at("showName").get<string>();
 	config.absolutePath = j.at("absolutePath").get<string>();
 	config.creationTime = j.at("creationTime").get<string>();
 	config.lastMoveTime = j.at("lastMoveTime").get<string>();
 	config.coordinate = Coordinate::fromJson(j.at("coordinate"));
-	config.count = j.at("count").get<int>();
+	// config.count = j.at("count").get<int>();
 	return config;
 }

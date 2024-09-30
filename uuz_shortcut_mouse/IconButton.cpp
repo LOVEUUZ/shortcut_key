@@ -48,7 +48,7 @@ void IconButton::init_icon(const QString& filePath) {
 	setIcon(m_icon);
 	setIconSize(QSize(iconSize, iconSize));
 	qDebug() << "名字 ==》 " << QString::fromUtf8(config.fileName);
-	setText(QString::fromUtf8(config.fileName));
+	setText(QString::fromUtf8(config.showName));
 	setToolButtonStyle(Qt::ToolButtonTextUnderIcon); // 图标在文字上方
 	setStyleSheet("QToolButton { background-color: #b7b7b7; border: 1px solid #888; border-radius: 5px; }");
 }
@@ -82,11 +82,10 @@ void IconButton::mouseReleaseEvent(QMouseEvent* event) {
 				QPoint newCoordinate = QPoint(vec_coordinate->at(closestIndex).first, vec_coordinate->at(closestIndex).second);
 				move(newCoordinate); // 移动到新的坐标
 				//放置到新位置后，更新索引与按钮的映射
-				qDebug() << "Removing key:" << ID;
-				map_index_button->remove(ID);
-				ID = closestIndex;
-				map_index_button->insert(closestIndex, this);
 
+		  //移动完成，通知父窗口修改配置文件
+				emit sig_move_modify_config(closestIndex, ID);
+				ID = closestIndex;
 			}
 			else move(originalPos);
 		}
@@ -99,7 +98,7 @@ void IconButton::mouseReleaseEvent(QMouseEvent* event) {
 		is_moving = false; // 状态重置
 
 		// 发出信号通知父窗口隐藏虚线
-		emit buttonDragged(false);
+		emit sig_buttonDragged(false);
 	}
 	QToolButton::mouseReleaseEvent(event);
 }
@@ -112,7 +111,7 @@ void IconButton::mouseMoveEvent(QMouseEvent* event) {
 			is_moving = true;
 
 			// 发出信号通知父窗口显示虚线
-			emit buttonDragged(true);
+			emit sig_buttonDragged(true);
 
 			// 获取父窗口相对位置
 			QPoint parentPos = parentWidget()->mapFromGlobal(QCursor::pos());
@@ -151,11 +150,7 @@ void IconButton::openFile(const QString& filePath) {
 	QUrl    fileUrl = QUrl::fromLocalFile(filePath_tmp);  // 转为url
 	QDesktopServices::openUrl(fileUrl);                        // 使用该函数可以打开exe，也能打开jpg，txt等文件
 
-	// 如果需要打开文件所在的文件夹
-	// QUrl folderUrl = QUrl::fromLocalFile(QFileInfo(filePath_tmp).absolutePath());
-	// QDesktopServices::openUrl(folderUrl); // 打开文件夹
-
-	qDebug() << "Starting process:" << filePath_tmp;
+	qInfo() << "Starting process:" << filePath_tmp;
 }
 
 

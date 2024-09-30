@@ -55,5 +55,6 @@ private:
 	Config config;
 
 signals:
-	void buttonDragged(bool is_moving);
+	void sig_buttonDragged(bool is_moving);
+	void sig_move_modify_config(int new_index, int old_index);
 };
