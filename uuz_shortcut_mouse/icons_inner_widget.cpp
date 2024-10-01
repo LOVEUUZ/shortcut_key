@@ -337,6 +337,8 @@ void Icons_inner_widget::slot_add_icon() {
   // config.count         = 0;
 
   IconButton* tmp_qb = new IconButton(this, config);
+  connect(tmp_qb, &IconButton::sig_buttonDragged, this, &Icons_inner_widget::slot_showDashedBorder);
+  connect(tmp_qb, &IconButton::sig_move_modify_config, this, &Icons_inner_widget::slot_move_modify_config);
   tmp_qb->setGeometry(vec_coordinate[index].first, vec_coordinate[index].second, icon_button_size, icon_button_size);
   tmp_qb->show();
   map_index_button[index] = tmp_qb;
@@ -376,6 +378,8 @@ void Icons_inner_widget::slot_add_folder() {
 
   IconButton* tmp_qb = new IconButton(this, config);
   tmp_qb->setGeometry(vec_coordinate[index].first, vec_coordinate[index].second, icon_button_size, icon_button_size);
+  connect(tmp_qb, &IconButton::sig_buttonDragged, this, &Icons_inner_widget::slot_showDashedBorder);
+  connect(tmp_qb, &IconButton::sig_move_modify_config, this, &Icons_inner_widget::slot_move_modify_config);
   tmp_qb->show();
   map_index_button[index] = tmp_qb;
   vec_iconButton.push_back(std::move(tmp_qb)); // 将按钮添加到 vec_iconButton

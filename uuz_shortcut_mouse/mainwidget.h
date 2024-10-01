@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QtWidgets/QWidget>
 #include <QStackedWidget>
+#include <QTimer>
 
 #include "ui_mainwidget.h"
 #include "iconButton.h"
@@ -24,12 +25,15 @@ class MainWidget : public QWidget {
     // Ui::MainWidgetClass ui;
 
     //主要模块  
-    QLineEdit*          search_line;  //everything用搜索框
+    QLineEdit*          search_line;        //everything用搜索框
     QStackedWidget*     stacked_widget;      //用来包装下面两个窗口
     Icons_inner_widget* icons_inner_widget;  //图标显示窗口
     Search_content*     search_inner_widget; //搜索内容窗口
 
+    //搜索栏相关功能
     void init_search_line();
+    QTimer* searchTimer;                    //避免文本框 textChanged 触发过快
+
 
     //布局相关
     QVBoxLayout* topLayout;

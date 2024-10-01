@@ -71,10 +71,10 @@
       <Filter>Source Files\window</Filter>
     </ClCompile>
     <ClCompile Include="search_content.cpp">
-      <Filter>Header Files\window</Filter>
+      <Filter>Source Files\window</Filter>
     </ClCompile>
     <ClCompile Include="search_content.cpp">
-      <Filter>Source Files\window</Filter>
+      <Filter>Header Files\window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
