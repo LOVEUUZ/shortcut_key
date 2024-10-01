@@ -7,21 +7,22 @@
 #include "Everything.h"
 #include <QDebug>
 #include <QVBoxLayout>
-#include <QListWidget>
+#include <QTableWidget>
 #include <QStringList>
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
-#include <QMutex>
+// #include <QMutex>
 #include <QDesktopServices>
 #include <QUrl>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QHeaderView>
+#include <QApplication>
+#include <QClipboard>
 
-#include <windows.h>
 
-
-class Search_content : public QListWidget {
+class Search_content : public QTableWidget {
     Q_OBJECT
 
   public:
@@ -36,7 +37,7 @@ class Search_content : public QListWidget {
     DWORD             total_results; //所有结果数量
 
     //避免在槽函数执行addItems的时候子线程clear导致错误
-    QMutex            mutex;
+    // QMutex            mutex;
     std::atomic<bool> is_clear;
 
     void performSearch(const QString & text);
@@ -45,6 +46,8 @@ class Search_content : public QListWidget {
 
     //布局相关
     void init_layout();
+    void resizeEvent(QResizeEvent* event) override; //列宽调整
+
 
     //过滤条件
     void        init_filter_config();
@@ -56,7 +59,7 @@ class Search_content : public QListWidget {
     QStringList filter_suffix_list;
 
     //todo 过滤配置文件的修改在主菜单的配置中进行
-    
+
 
     //右键点击事件（左键有信号，右键没有）
     void contextMenuEvent(QContextMenuEvent* event) override;
@@ -70,6 +73,6 @@ class Search_content : public QListWidget {
 
   private slots:
     void slot_addItem(const QStringList & path_list);
-    void slot_open_file(const QListWidgetItem* item);
+    void slot_open_file(const QTableWidgetItem* item);
     // void slot_file_(const QListWidgetItem* item);
 };

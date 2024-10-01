@@ -1,17 +1,17 @@
 ﻿#include "Search_content.h"
 
-Search_content::Search_content(QWidget* parent) : QListWidget(parent), isSearching(false), searchThread(nullptr),
-                                                  max_results(1500), is_clear(false) {
-  // setStyleSheet("background-color: #123456;");
-
+Search_content::Search_content(QWidget* parent)
+  : QTableWidget(parent), isSearching(false), searchThread(nullptr),
+    max_results(1500), is_clear(false) {
+  // 初始化其他配置
   file_filter_path   = QCoreApplication::applicationDirPath() + "/config/config_filter_path.txt";
   file_filter_suffix = QCoreApplication::applicationDirPath() + "/config/config_filter_suffix.txt";
   init_filter_config();
   init_layout();
 
+
   connect(this, &Search_content::sig_addItem, this, &Search_content::slot_addItem);
-  connect(this, &Search_content::itemClicked, this, &Search_content::slot_open_file);
-  connect(this, &Search_content::itemEntered, this, &Search_content::slot_open_file);
+  connect(this, &Search_content::itemDoubleClicked, this, &Search_content::slot_open_file);
   // connect(this, &Search_content::itemDoubleClicked, this, &Search_content::slot_open_file);
 }
 
@@ -19,12 +19,24 @@ Search_content::~Search_content() {
   resetSearch();
 }
 
+//调整列宽
+void Search_content::resizeEvent(QResizeEvent* event) {
+  int totalWidth = this->width();
+  int col1Width  = totalWidth * 0.05; // 5% 宽度 ps: 有最小像素点限制，所以只能将就了
+  int col2Width  = totalWidth * 0.20; // 20% 宽度
+  int col3Width  = totalWidth * 0.75; // 75% 宽度
+  this->setColumnWidth(0, 5);
+  this->setColumnWidth(1, col2Width);
+  this->setColumnWidth(2, col3Width);
+  QTableWidget::resizeEvent(event);
+}
+
+
 void Search_content::slot_text_change(const QString & text) {
   if (!Everything_IsDBLoaded()) {
     qDebug() << "Everything数据库未加载";
     return;
   }
-
 
   if (isSearching) {
     qDebug() << "停止前一次搜索";
@@ -48,59 +60,131 @@ void Search_content::slot_text_change(const QString & text) {
 // 子线程发送搜索的结果信号,在主线程中添加，避免子线程中添加导致主线程卡顿
 //将每一次添加的个数设置为50个，避免在任务线程中执行clear的时候这里还在执行addItems，同时避免持有锁太久
 void Search_content::slot_addItem(const QStringList & path_list) {
-  qDebug() << "调用addItem";
   if (!path_list.isEmpty()) {
-    static constexpr int chunkSize = 50; // 每组的大小
-    for (int i = 0; i < path_list.size(); i += chunkSize) {
-      // 计算当前组的结束索引
-      int end = qMin(i + chunkSize, path_list.size());
-      // 创建子列表
-      QStringList subList = path_list.mid(i, end - i);
-      // 上锁，添加子列表
-      {
-        QMutexLocker locker(&mutex);
-        if (!is_clear) addItems(subList);
-        else return;
+    // QMutexLocker locker(&mutex);
+    if (!is_clear) {
+      for (const QString & filePath : path_list) {
+        QFileInfo fileInfo(filePath);
+        int       row = this->rowCount();
+        this->insertRow(row);
+        this->setRowHeight(row, 10); // 设置行高为10像素
+
+        // 第一列：文件夹或文件名
+        if (fileInfo.isDir()) {
+          this->setItem(row, 0, new QTableWidgetItem("  d"));
+        }
+        else {
+          this->setItem(row, 0, new QTableWidgetItem("  -"));
+        }
+
+        // 第二列：文件名称
+        this->setItem(row, 1, new QTableWidgetItem(fileInfo.fileName()));
+
+        // 第三列：全路径
+        this->setItem(row, 2, new QTableWidgetItem(fileInfo.absoluteFilePath()));
       }
     }
   }
 }
 
-//单击打开对应文件
-void Search_content::slot_open_file(const QListWidgetItem* item) {
-  QString filePath_tmp = QDir::toNativeSeparators(item->text()); // 转为本地格式
-  QUrl    fileUrl      = QUrl::fromLocalFile(filePath_tmp);      // 转为url
-  QDesktopServices::openUrl(fileUrl);                            // 使用该函数可以打开exe，也能打开jpg，txt等文件
+
+//双击打开对应文件
+void Search_content::slot_open_file(const QTableWidgetItem* item) {
+  int     row          = item->row();
+  QString filePath_tmp = QDir::toNativeSeparators(this->item(row, 2)->text()); // 转为本地格式
+  QUrl    fileUrl      = QUrl::fromLocalFile(filePath_tmp);                    // 转为url
+  QDesktopServices::openUrl(fileUrl);                                          // 使用该函数可以打开exe，也能打开jpg，txt等文件
 
   qInfo() << "Starting process:" << filePath_tmp;
+
+  //todo 判断失去焦点后时候关闭该窗口
 }
 
 //右键点击事件
 void Search_content::contextMenuEvent(QContextMenuEvent* event) {
-  QListWidgetItem* item = itemAt(event->pos());
-  // if (item) {
-  //   QMenu    menu(this);
-  //   QAction* action = menu.addAction("打开文件");
-  //   QAction* action = menu.addAction("打开路径");
-  //   QAction* action = menu.addAction("复制绝对路径和文件名");
-  //   connect(action, &QAction::triggered, this, [this, item]() {
-  //     // 在这里处理自定义操作
-  //   });
-  //   menu.exec(event->globalPos());
-  //   menu.deleteLater(); //主动销毁
-  // }
+  QTableWidgetItem* item = itemAt(event->pos());
+  if (item) {
+    QMenu    menu(this);
+    QAction* act_open_file   = menu.addAction("打开文件");
+    QAction* act_open_folder = menu.addAction("打开路径");
+    QAction* act_copy        = menu.addAction("复制绝对路径");
+    QAction* act_filter_disk = menu.addAction("过滤只显示当前盘符");
+
+    //打开文件
+    connect(act_open_file, &QAction::triggered, [this, item]() {
+      emit itemDoubleClicked(item);
+    });
+
+    //打开文件夹
+    connect(act_open_folder, &QAction::triggered, [this, item]() {
+      int     row  = item->row();
+      QString path = this->item(row, 2)->text(); // 获取路径
+
+      QFileInfo fileInfo(path);
+
+      if (fileInfo.exists()) {
+        if (fileInfo.isDir()) {
+          // 如果是文件夹，直接打开
+          QUrl directoryUrl = QUrl::fromLocalFile(path);
+          QDesktopServices::openUrl(directoryUrl);
+          qInfo() << "打开文件夹: " << path;
+        }
+        else {
+          // 如果是文件，打开其所在文件夹
+          QString directoryPath = fileInfo.absolutePath();
+          QUrl    folderUrl     = QUrl::fromLocalFile(directoryPath);
+          QDesktopServices::openUrl(folderUrl);
+          qInfo() << "打开文件所属文件夹: " << directoryPath;
+        }
+      }
+      else {
+        qWarning() << "路径不存在:" << path;
+      }
+    });
+
+    //复制路径
+    connect(act_copy, &QAction::triggered, [this, item]() {
+      int     row  = item->row();
+      QString path = this->item(row, 2)->text(); // 获取路径
+
+      QClipboard* clipboard = QApplication::clipboard(); //获取剪贴板对象
+      clipboard->setText(path);
+      qInfo() << "复制路径: " << path;
+    });
+
+    //移除非当前盘符
+    connect(act_filter_disk, &QAction::triggered, [this, item]() {
+      int     row        = item->row();
+      QString path       = this->item(row, 2)->text(); // 获取路径
+      QChar   first_char = path[0];
+
+      //从后向前遍历(避免索引改变导致漏行)，当前所有行元素的第三列全路径，判断盘符开头，不是则移除
+      for (int row1 = rowCount() - 1; row1 >= 0; --row1) {
+        if (QTableWidgetItem* item_ = this->item(row1, 2)) {
+          QString text = item_->text();
+          if (text[0] != first_char) {
+            removeRow(row1);
+          }
+        }
+      }
+    });
+
+    menu.exec(event->globalPos());
+    menu.deleteLater(); //主动销毁
+  }
 
 
-  QListWidget::contextMenuEvent(event);
+  QTableWidget::contextMenuEvent(event);
 }
 
 
 // 线程任务
 void Search_content::performSearch(const QString & text) {
   {
-    QMutexLocker locker(&mutex);
+    // QMutexLocker locker(&mutex);
     is_clear = true;
-    clear();
+    this->setRowCount(0);
+    // clear();
   }
 
   if (text.isEmpty()) {
@@ -134,16 +218,8 @@ void Search_content::performSearch(const QString & text) {
     LPCWSTR fileName = Everything_GetResultFileNameW(i);
     LPCWSTR filePath = Everything_GetResultPathW(i);
 
-    // 分类处理文件和文件夹
-    QString fullPath;
-    if (Everything_IsFolderResult(i)) {
-      // 文件夹的绝对路径
-      fullPath = QString::fromWCharArray(filePath);
-    }
-    else {
-      // 获取文件的绝对路径
-      fullPath = QString::fromWCharArray(filePath) + "\\" + QString::fromWCharArray(fileName);
-    }
+    // 修改，不分类处理文件和文件夹,没必要
+    QString fullPath = QString::fromWCharArray(filePath) + "\\" + QString::fromWCharArray(fileName);
 
     // 过滤路径
     bool isFiltered = false;
@@ -216,7 +292,22 @@ void Search_content::handleErrors(DWORD errorCode, const QString & text) {
   }
 }
 
-void Search_content::init_layout() {}
+void Search_content::init_layout() {
+  this->setColumnCount(3);                                // 设置列数为3
+  this->setHorizontalHeaderLabels({"类型", "文件名称", "全路径"}); // 设置列标题
+  // this->horizontalHeader()->setVisible(false);           // 隐藏水平标题
+  this->verticalHeader()->setVisible(false);             // 隐藏垂直标题
+  this->setShowGrid(false);                              // 隐藏网格线
+  this->setStyleSheet("QTableWidget { border: none; }"); // 设置无边框
+  this->setSelectionBehavior(SelectRows);                // 选择整行
+  this->setSortingEnabled(true);                         // 启用排序功能
+  this->horizontalHeader()->setSortIndicatorShown(true); // 显示排序指示器
+  this->setRowHeight(0, 10);                             // 默认行高为10像素
+  this->setEditTriggers(NoEditTriggers);                 //禁止编辑
+  QFont font = this->font();                             // 获取当前字体
+  font.setPointSize(8);                                  // 设置字体大小
+  this->setFont(font);                                   // 应用新的字体
+}
 
 //过滤配置文件的读取
 void Search_content::init_filter_config() {
