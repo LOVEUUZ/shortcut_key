@@ -22,6 +22,9 @@
 #include <QClipboard>
 
 
+
+
+
 class Search_content : public QTableWidget {
     Q_OBJECT
 
@@ -75,4 +78,8 @@ class Search_content : public QTableWidget {
     void slot_addItem(const QStringList & path_list);
     void slot_open_file(const QTableWidgetItem* item);
     // void slot_file_(const QListWidgetItem* item);
+
+
+  protected:
+    void keyPressEvent(QKeyEvent* event) override;
 };

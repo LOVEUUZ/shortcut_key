@@ -71,10 +71,19 @@
       <Filter>Source Files\window</Filter>
     </ClCompile>
     <ClCompile Include="search_content.cpp">
+      <Filter>Header Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="search_line.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
     <ClCompile Include="search_content.cpp">
-      <Filter>Header Files\window</Filter>
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsHookEx.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="keyEvent.cpp">
+      <Filter>Source Files\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +99,12 @@
     <ClInclude Include="everything_ipc.h">
       <Filter>Header Files\Component</Filter>
     </ClInclude>
+    <ClInclude Include="WindowsHookEx.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="keyEvent.h">
+      <Filter>Header Files\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="iconButton.h">
@@ -99,6 +114,12 @@
       <Filter>Header Files\window</Filter>
     </QtMoc>
     <QtMoc Include="search_content.h">
+      <Filter>Header Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="Search_line.h">
+      <Filter>Source Files\Component</Filter>
+    </QtMoc>
+    <QtMoc Include="Search_line.h">
       <Filter>Header Files\window</Filter>
     </QtMoc>
   </ItemGroup>
@@ -113,6 +134,12 @@
       <Filter>Header Files\window</Filter>
     </QtUic>
     <QtUic Include="search_content.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Search_line.ui">
+      <Filter>Source Files\Component</Filter>
+    </QtUic>
+    <QtUic Include="Search_line.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

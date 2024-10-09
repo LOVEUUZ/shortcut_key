@@ -4,15 +4,21 @@
 
 #include "icons_inner_widget.h"
 
+#include "mainwidget.h"
+class MainWidget;
+
+
+
 int                      IconButton::iconSize = 64;
 bool                     IconButton::is_moving = false;
 
 
-IconButton::IconButton(QWidget* parent, const Config config) : QToolButton(parent),config(config) {
+IconButton::IconButton(QWidget* parent, const Config config) : QToolButton(parent), config(config), changeShowNameEdit(nullptr) {
 
 	this->ID = config.id;
 	this->filePath = QString::fromUtf8(config.absolutePath);
-
+	showName = QString::fromStdString(config.showName);			//显示名称
+	setText(showName);
 	parentWidget_content = dynamic_cast<Icons_inner_widget*>(parentWidget());
 	vec_coordinate = parentWidget_content->get_vec_coordinate();
 	map_index_button = parentWidget_content->get_map_index_button();
@@ -22,6 +28,8 @@ IconButton::IconButton(QWidget* parent, const Config config) : QToolButton(paren
 	// 设置透明背景，只显示图标和文字
 	setAttribute(Qt::WA_TranslucentBackground, true);
 	setStyleSheet("QToolButton { background: transparent; border: none; }");
+
+	connect(this, &IconButton::sig_changeShowName, this, &IconButton::slot_changeShowName);
 }
 
 
@@ -151,6 +159,13 @@ void IconButton::openFile(const QString& filePath) {
 	QDesktopServices::openUrl(fileUrl);                        // 使用该函数可以打开exe，也能打开jpg，txt等文件
 
 	qInfo() << "Starting process:" << filePath_tmp;
+
+	//主动失去焦点，隐藏主窗口
+	QWidget* widget_ = this->parentWidget()->parentWidget()->parentWidget();	  //this->icons_inner_widget->stacked_widget->MainWidget
+	MainWidget* mainWidget = qobject_cast<MainWidget*>(widget_);
+	if (mainWidget != nullptr) {
+		emit mainWidget->sig_move_focus(nullptr);
+	}
 }
 
 
@@ -170,3 +185,31 @@ int IconButton::calculateClosestIndex(const QPoint& pos) {
 	}
 	return -1; // 没有找到
 }
+
+void IconButton::slot_changeShowName() {
+	if (changeShowNameEdit == nullptr) {
+		changeShowNameEdit = new QLineEdit(this);
+		connect(changeShowNameEdit, &QLineEdit::editingFinished, this, [&]() {
+			QString newShowName = changeShowNameEdit->text();
+			qDebug() << "修改后的名称为 >> " << newShowName;
+			setShowName(newShowName);
+			setText(newShowName); // 更新按钮显示的文本
+			changeShowNameEdit->hide();
+
+			//然后去更新配置文件
+			config.showName = newShowName.toStdString();
+			emit sig_modify_config(config);
+			});
+	}
+
+	changeShowNameEdit->setText(showName);
+
+	// 设置编辑框的在底部，宽度为整个对象
+	int textY = height() - changeShowNameEdit->height(); // 将编辑框放在按钮的底部
+	changeShowNameEdit->setGeometry(0, textY, width(), changeShowNameEdit->height());
+
+	changeShowNameEdit->show();
+	changeShowNameEdit->setFocus();
+}
+
+

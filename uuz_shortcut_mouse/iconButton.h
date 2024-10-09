@@ -4,6 +4,7 @@
 #include <QFileIconProvider>
 #include <QDesktopServices>
 #include <QDir>
+#include <QLineEdit>
 #include <QMouseEvent>
 
 #include "config.h"
@@ -22,6 +23,9 @@ public:
 	IconButton(QWidget* parent, const Config config);
 	~IconButton();
 
+	inline QString getShowName() { return showName; }
+	inline bool    setShowName(const QString& newName) { showName = newName; return true; }
+
 	int ID;
 
 protected:
@@ -33,7 +37,7 @@ protected:
 
 private:
 	void        init_icon(const QString& filePath);
-	static void openFile(const QString& filePath);
+  void openFile(const QString& filePath);
 	void        updateIcon(const QString& filePath);
 	int         calculateClosestIndex(const QPoint& pos);
 
@@ -44,6 +48,7 @@ private:
 
 
 	QString     filePath;
+	QString     showName;
 	QIcon       m_icon;				// 文件图标
 	static int  iconSize;
 	static bool is_moving;    // 是否在移动
@@ -53,7 +58,16 @@ private:
 	//配置相关
 	Config config;
 
+	QLineEdit* changeShowNameEdit;
+
 signals:
 	void sig_buttonDragged(bool is_moving);
 	void sig_move_modify_config(int new_index, int old_index);
+	void sig_modify_config(Config& config);		//修改配置文件，和上面的移动的修改配置文件其实重复了
+
+	void sig_changeShowName();
+
+
+public slots:
+	void slot_changeShowName();
 };
