@@ -23,8 +23,6 @@
 
 
 
-
-
 class Search_content : public QTableWidget {
     Q_OBJECT
 

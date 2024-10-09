@@ -33,6 +33,12 @@
     <Filter Include="Header Files\window">
       <UniqueIdentifier>{b06aaa61-e970-4c8d-be61-6007d93a54d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\tools">
+      <UniqueIdentifier>{f711d78a-9917-40c6-ad6e-80470aff18bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tools">
+      <UniqueIdentifier>{a6f98a39-6a73-43bc-8dfe-e1005da5025e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="mainwidget.qrc">
@@ -79,10 +85,16 @@
     <ClCompile Include="search_content.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsHookEx.cpp">
+    <ClCompile Include="WindowsHookKeyEx.cpp">
       <Filter>Source Files\Component</Filter>
     </ClCompile>
     <ClCompile Include="keyEvent.cpp">
+      <Filter>Source Files\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsHookMouseEx.cpp">
       <Filter>Source Files\Component</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,11 +111,14 @@
     <ClInclude Include="everything_ipc.h">
       <Filter>Header Files\Component</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsHookEx.h">
+    <ClInclude Include="WindowsHookKeyEx.h">
       <Filter>Header Files\Component</Filter>
     </ClInclude>
     <ClInclude Include="keyEvent.h">
       <Filter>Header Files\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsHookMouseEx.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +136,9 @@
     </QtMoc>
     <QtMoc Include="Search_line.h">
       <Filter>Header Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="logger.h">
+      <Filter>Header Files\tools</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

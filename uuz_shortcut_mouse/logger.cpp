@@ -1,4 +1,4 @@
-﻿#include "Logger.h"
+#include "Logger.h"
 
 Logger::Logger() : retentionDays(7), last_checked_date_(QDate::currentDate()) {
     logPath = QCoreApplication::applicationDirPath() + "/log/";
@@ -38,11 +38,6 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 
 // 写入日志
 void Logger::logMessage(QtMsgType type, const QString& msg) {
-
-#ifdef _Release
-    if(type == QtDebugMsg) return;
-#endif
-
     QMutexLocker locker(&logMutex);
 
     QString txt;

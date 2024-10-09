@@ -8,21 +8,24 @@
 #include <QStackedWidget>
 #include <QTimer>
 #include <QFont>
+#include <QSystemTrayIcon>
 
 #include "ui_mainwidget.h"
 #include "iconButton.h"
 #include "icons_inner_widget.h"
 #include "search_content.h"
 #include "Search_line.h"
-#include "WindowsHookEx.h"
+#include "WindowsHookKeyEx.h"
+#include "WindowsHookMouseEx.h"
 #include "keyEvent.h"
+
 
 
 class MainWidget : public QWidget {
 	Q_OBJECT
 
-		//仅用于子窗口调用焦点转移信号
-		friend Search_line;
+  //仅用于子窗口调用焦点转移信号
+  friend Search_line;
 	friend IconButton;
 	friend Search_content;
 
@@ -45,20 +48,28 @@ private:
 
 
 	//布局相关
+	void init_layout(); //初始化布局
 	QVBoxLayout* topLayout;
 	QVBoxLayout* v_search_and_grid;
 	QVBoxLayout* top_layout;
 	QVBoxLayout* iconsLayout; //下半部分用来为icons_inner_widget设置内边距的布局
 
-	// void paintEvent(QPaintEvent* event);
-	void init_layout(); //初始化布局
-
-	//隐藏与显示该窗口快捷键，暂定为连续按下两次ctrl
+	//快捷呼出相关，暂定为连续按下两次ctrl
 	void init_shortcut_key();
 	QTimer* ctrlPressTimer;		  //定时
 	int ctrlPressCount;				  //计数
-	WindowsHookEx* windowsHookEx;//windows钩子
-	void setKeyEvent();				  //注册事件
+	WindowsHookKeyEx* windowsKeyHookEx;//windows键盘钩子
+	WindowsHookMouseEx* windowsMouseHook;	  //windows鼠标钩子
+	void setKeyEvent();				  //注册键盘事件
+	void setMouseEvent();				  //注册鼠标事件
+
+  void showEvent(QShowEvent* event) override;
+  void hideEvent(QHideEvent* event) override;
+
+	//系统托盘
+  void init_tray();
+  QMenu trayMenu;						  //托盘菜单
+	QSystemTrayIcon trayIcon;	  //托盘图标
 
 signals:
 	void sig_move_focus(QWidget*); //焦点移动

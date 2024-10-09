@@ -3,7 +3,7 @@
 my_dialog_key_input::my_dialog_key_input(QWidget* parent): QDialog(parent) {
   resize(600, 100);
 
-  ptr_windows_hook = WindowsHookEx::getWindowHook();
+  ptr_windows_hook = WindowsHookKeyEx::getWindowHook();
   start_quickly_   = StartQuickly::getStartQuickly();
   // main_window_ = qobject_cast<MainWindow*>(parent);
   // main_window_ = globalVar;
@@ -107,7 +107,7 @@ void my_dialog_key_input::closeEvent(QCloseEvent* event) {
 void my_dialog_key_input::setFunc() {
   qInfo() << "注册dialog键盘事件";
   auto func = [&](const KeyEvent& key_event) { set_key_event(key_event); };
-  WindowsHookEx::ptr_windows_hook->setFunc(func);
+  WindowsHookKeyEx::ptr_windows_hook->setFunc(func);
 }
 
 //处理按键事件

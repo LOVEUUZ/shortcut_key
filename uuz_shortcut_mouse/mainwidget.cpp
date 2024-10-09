@@ -1,13 +1,5 @@
 ﻿#include "mainwidget.h"
 
-#include <iostream>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QApplication>
-#include <QPainter>
-#include <QPainterPath>
 
 MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
 	// ui.setupUi(this);
@@ -21,6 +13,13 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
 	init_search_line();
 
 	connect(this, &MainWidget::sig_move_focus, this, &MainWidget::slot_move_focus);
+
+	init_tray();
+
+
+#ifdef NDEBUG
+	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);	  //置顶
+#endif
 
 	// setStyleSheet("MainWidget{background-color: #b7b7b7;} ");
 }
@@ -115,6 +114,7 @@ void MainWidget::init_layout() {
 }
 
 void MainWidget::init_shortcut_key() {
+	//键盘捕获部分
 	ctrlPressTimer = new QTimer(this);
 	ctrlPressTimer->setInterval(300); // 0.3秒
 	ctrlPressTimer->setSingleShot(true);
@@ -123,26 +123,114 @@ void MainWidget::init_shortcut_key() {
 		});
 
 	setKeyEvent();
+
+	//鼠标钩子
+	setMouseEvent();
 }
 
 
 void MainWidget::setKeyEvent() {
-  //注册给钩子那边调用的函数
+	//注册给钩子那边调用的函数
 	std::function<void(KeyEvent)> func = [&](const KeyEvent& event) {
-		if ((event.key == 162 && event.isPressed) || (event.key == 163 && event.isPressed)) {		//左右的ctrl
+		if ((event.key == 162 && event.isPressed) || (event.key == 163 && event.isPressed)) {
+			//左右的ctrl
 			ctrlPressTimer->start();
 			ctrlPressCount++;
-			if (ctrlPressCount == 2) {	  //双击唤醒/隐藏窗口
-				if (isHidden()) show();
+			if (ctrlPressCount == 2) {
+				//双击唤醒/隐藏窗口
+				if (isHidden()) {
+					this->raise();
+					this->activateWindow();
+					show();
+				}
 				else hide();
 			}
 		}
 		};
 
-	windowsHookEx = WindowsHookEx::getWindowHook();
-	windowsHookEx->installHook();
-	windowsHookEx->setFunc(func);
+	windowsKeyHookEx = WindowsHookKeyEx::getWindowHook();
+	windowsKeyHookEx->installHook();
+	windowsKeyHookEx->setFunc(func);
+}
 
+void MainWidget::setMouseEvent() {
+	//鼠标事件捕获部分
+	windowsMouseHook = WindowsHookMouseEx::getWindowHook();
+	////回调注册方法,当鼠标不在程序内部点击的时候，隐藏程序窗口
+	std::function<void()> func = [&]() {
+		// 获取鼠标的全局坐标
+		auto mouse_coordinate = QCursor::pos();
+		// 获取窗口左上角的全局坐标
+		QPoint globalPos = mapToGlobal(QPoint(0, 0));
+		// 创建一个包含窗口大小的矩形
+		QRect globalRect = QRect(globalPos, size());
+
+		// 判断鼠标坐标是否在窗口的全局矩形内
+		if (!globalRect.contains(mouse_coordinate)) {
+			emit sig_move_focus(nullptr); // 如果不在窗口内，发出信号
+		}
+		};
+
+	windowsMouseHook->setFunc(func);
+
+#ifdef _DEBUG
+	windowsMouseHook->installHook(); //安装鼠标钩子。当窗口显示的时候安装，隐藏的时候卸载
+#endif
+}
+
+void MainWidget::showEvent(QShowEvent* event) {
+	windowsMouseHook->installHook(); //安装鼠标钩子
+
+	SetForegroundWindow((HWND)this->winId());			//通过windows api来让该程序先获得焦点，才能让子窗口获取焦点
+	search_line->setFocus();		//显示的时候强制获取焦点
+
+	QWidget::showEvent(event);
+}
+
+void MainWidget::hideEvent(QHideEvent* event) {
+	windowsMouseHook->unInstallHook(); //卸载鼠标钩子
+
+	search_line->clear();		//清空搜索栏，并让界面重回图标界面
+
+	QWidget::hideEvent(event);
+}
+
+//托盘用
+void MainWidget::init_tray() {
+	trayIcon.setIcon(QIcon(":/res/Resource/uuz_tray.ico"));
+
+	// 添加菜单项
+	auto act_show = new QAction("Show", &trayMenu);
+	// auto act_enable = new QAction("enable/disable", &trayMenu);
+	auto act_exit = new QAction("Exit", &trayMenu);
+
+	trayMenu.addAction(act_show);
+	trayMenu.addAction(act_exit);
+
+	// 设置托盘图标的上下文菜单
+	trayIcon.setContextMenu(&trayMenu);
+
+	// 连接菜单项的信号和槽
+	connect(act_show, &QAction::triggered, [&]() {
+		this->show();
+		});
+
+	// connect(act_enable, &QAction::triggered, [&]() {
+	//   static bool enable = true;
+	//   if (enable) {
+	//     
+	//   }
+	//   else {
+	//     
+	//   }
+	// });
+
+	connect(act_exit, &QAction::triggered, [&]() {
+		QApplication::quit();
+		});
+
+	// 显示托盘图标
+	trayIcon.show();
 }
 
 
@@ -155,6 +243,6 @@ void MainWidget::slot_move_focus(QWidget* widget) {
 		widget->setFocus();
 	}
 	else {
-		this->hide();   //隐藏主窗口
+		this->hide(); //隐藏主窗口
 	}
 }

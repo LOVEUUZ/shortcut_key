@@ -82,13 +82,13 @@
     <ClCompile Include="startQuickly.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsHookEx.cpp">
+    <ClCompile Include="WindowsHookKeyEx.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tools.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
       <Filter>Source Files\tools</Filter>
     </ClCompile>
   </ItemGroup>
@@ -108,13 +108,13 @@
     <QtMoc Include="substyleditemdelegate.h">
       <Filter>Header Files\delegate</Filter>
     </QtMoc>
-    <QtMoc Include="logger.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Trigger.hpp">
       <Filter>Source Files\Component</Filter>
     </QtMoc>
     <QtMoc Include="tools.h">
+      <Filter>Header Files\tools</Filter>
+    </QtMoc>
+    <QtMoc Include="logger.h">
       <Filter>Header Files\tools</Filter>
     </QtMoc>
   </ItemGroup>
@@ -125,7 +125,7 @@
     <ClInclude Include="keyEvent.h">
       <Filter>Header Files\Component</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsHookEx.h">
+    <ClInclude Include="WindowsHookKeyEx.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="startQuickly.h">

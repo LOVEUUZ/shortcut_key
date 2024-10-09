@@ -30,7 +30,7 @@ class my_dialog_key_input : public QDialog {
 
   private:
     StartQuickly*  start_quickly_;
-    WindowsHookEx* ptr_windows_hook;
+    WindowsHookKeyEx* ptr_windows_hook;
 
     std::set<uint64_t> set_; //确保一个按键只能绑定一次，重置按钮按下的时候清除这里
 

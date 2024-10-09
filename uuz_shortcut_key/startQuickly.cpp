@@ -18,7 +18,7 @@ StartQuickly* StartQuickly::getStartQuickly() {
 }
 
 StartQuickly::StartQuickly() {
-  ptr_windows_hook = WindowsHookEx::getWindowHook();
+  ptr_windows_hook = WindowsHookKeyEx::getWindowHook();
   ptr_windows_hook->installHook();
   setFunc();
   initThread();

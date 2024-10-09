@@ -60,14 +60,24 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 		action_change_show_name->setEnabled(false); // 默认禁用
 		// 根据鼠标当前相对于该窗口的坐标偏移，可以判断是否在某个格子内，然后判断该格子当前是否有映射
 		QPoint localPos = this->mapFromGlobal(QCursor::pos());
-		for (int i = 0; i < vec_coordinate.size(); ++i) {
-			QRect coordinateRange(vec_coordinate[i].first, vec_coordinate[i].second,
-				icon_button_size, icon_button_size); // 修正矩形范围的计算
+
+#ifdef _DEBUG
+		qDebug() << localPos.x() << "," << localPos.y();
+#endif
+
+		for (int i = 0; i < vec_config.size(); ++i) {
+			QRect coordinateRange(vec_config[i].coordinate.x, vec_config[i].coordinate.y,
+				icon_button_size, icon_button_size);
 			if (coordinateRange.contains(localPos)) {
+
+#ifdef _DEBUG
+				qDebug() << "删除可用";
+#endif
+
 				// 包含在内，只要有一个包含在内就能退出循环了
 				action_delete_icon->setEnabled(true);
 				action_change_show_name->setEnabled(true); // 默认禁用
-				id = i;                                    // 假设你需要保存索引
+				id = i;
 				break;
 			}
 		}

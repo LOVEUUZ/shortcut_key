@@ -13,11 +13,11 @@
 #include "keyEvent.h"
 
 //核心，windows钩子
-class WindowsHookEx {
+class WindowsHookKeyEx {
   public:
-    static WindowsHookEx* ptr_windows_hook;
+    static WindowsHookKeyEx* ptr_windows_hook;
 
-    static WindowsHookEx* getWindowHook();
+    static WindowsHookKeyEx* getWindowHook();
 
     void installHook();
 
@@ -27,8 +27,8 @@ class WindowsHookEx {
     bool setFunc(const std::function<void(KeyEvent)> & newFunc);
 
   private:
-    explicit WindowsHookEx() = default;
-    ~WindowsHookEx()         = default;
+    explicit WindowsHookKeyEx() = default;
+    ~WindowsHookKeyEx()         = default;
 
     HHOOK             hook;
     MSG               msg;

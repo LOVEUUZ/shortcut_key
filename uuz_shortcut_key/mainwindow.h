@@ -25,7 +25,7 @@
 
 #include <utility>
 #include <Windows.h>
-#include "WindowsHookEx.h"
+#include "WindowsHookKeyEx.h"
 
 #include "substyleditemdelegate.h"
 #include "json.hpp"

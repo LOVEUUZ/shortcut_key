@@ -1,20 +1,20 @@
-﻿#include "WindowsHookEx.h"
+﻿#include "WindowsHookKeyEx.h"
 
 #include <iostream>
 #include <qlogging.h>
 
 #include "keyEvent.h"
 
-WindowsHookEx* WindowsHookEx::ptr_windows_hook = nullptr;
+WindowsHookKeyEx* WindowsHookKeyEx::ptr_windows_hook = nullptr;
 
-WindowsHookEx* WindowsHookEx::getWindowHook() {
+WindowsHookKeyEx* WindowsHookKeyEx::getWindowHook() {
   if (ptr_windows_hook == nullptr) {
-    ptr_windows_hook = new WindowsHookEx;
+    ptr_windows_hook = new WindowsHookKeyEx;
   }
   return ptr_windows_hook;
 }
 
-void WindowsHookEx::installHook() {
+void WindowsHookKeyEx::installHook() {
   getWindowHook();
   hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, nullptr, 0);
   if (hook == nullptr) {
@@ -23,10 +23,10 @@ void WindowsHookEx::installHook() {
   }
   
   // 消息循环在单独的线程中运行
-  msgLoopThread = std::thread(&WindowsHookEx::messageLoop, this);
+  msgLoopThread = std::thread(&WindowsHookKeyEx::messageLoop, this);
 }
 
-void WindowsHookEx::unInstallHook() {
+void WindowsHookKeyEx::unInstallHook() {
   if (hook != nullptr) {
     stopRequested = true;
 
@@ -46,7 +46,7 @@ void WindowsHookEx::unInstallHook() {
   }
 }
 
-bool WindowsHookEx::setFunc(const std::function<void(KeyEvent)> & newFunc) {
+bool WindowsHookKeyEx::setFunc(const std::function<void(KeyEvent)> & newFunc) {
   // if (func != nullptr) {
   //   return false;
   // }
@@ -55,7 +55,7 @@ bool WindowsHookEx::setFunc(const std::function<void(KeyEvent)> & newFunc) {
 }
 
 //循环windows键盘事件
-void WindowsHookEx::messageLoop() {
+void WindowsHookKeyEx::messageLoop() {
   msgLoopThreadId = GetCurrentThreadId();
   while (!stopRequested.load()) {
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -68,7 +68,7 @@ void WindowsHookEx::messageLoop() {
   }
 }
 
-std::string WindowsHookEx::getKeyName(DWORD vkCode) {
+std::string WindowsHookKeyEx::getKeyName(DWORD vkCode) {
   UINT scanCode = MapVirtualKey(vkCode, MAPVK_VK_TO_VSC);
   // Construct a fake lParam
   LONG lParam = (scanCode << 16) | 1;
@@ -82,16 +82,16 @@ std::string WindowsHookEx::getKeyName(DWORD vkCode) {
 }
 
 //钩子函数
-LRESULT WindowsHookEx::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT WindowsHookKeyEx::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   if (nCode >= 0) {
     KBDLLHOOKSTRUCT* pkbhs   = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-    std::string      keyName = WindowsHookEx::getKeyName(pkbhs->vkCode);
+    std::string      keyName = WindowsHookKeyEx::getKeyName(pkbhs->vkCode);
 
     std::pair<uint64_t, std::string> p = std::make_pair(pkbhs->vkCode, keyName);
 
     KeyEvent key_event;
     key_event.key      = pkbhs->vkCode;
-    key_event.key_name = WindowsHookEx::getKeyName(pkbhs->vkCode);
+    key_event.key_name = WindowsHookKeyEx::getKeyName(pkbhs->vkCode);
     if ((pkbhs->vkCode == 164 || pkbhs->vkCode == 165) && wParam == WM_KEYUP) {
       key_event.isPressed = false;
     }

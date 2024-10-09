@@ -51,7 +51,7 @@ private:
 
 	//配置文件相关
 	QString         file_path;
-	QFile* file_config;
+	QFile*				  file_config;
 	QString         qstr_config_content;
 	std::string     str_config_content;
 	// nlohmann::json  config_jsonArray;

@@ -1,4 +1,6 @@
 <RCC>
-    <qresource prefix="MainWidget">
+    <qresource prefix="/res">
+        <file>Resource/uuz_logo.ico</file>
+        <file>Resource/uuz_tray.ico</file>
     </qresource>
 </RCC>

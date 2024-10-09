@@ -98,6 +98,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="keyEvent.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="search_content.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -105,7 +106,8 @@
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
     <ClCompile Include="search_line.cpp" />
-    <ClCompile Include="WindowsHookEx.cpp" />
+    <ClCompile Include="WindowsHookKeyEx.cpp" />
+    <ClCompile Include="WindowsHookMouseEx.cpp" />
     <QtRcc Include="mainwidget.qrc" />
     <QtUic Include="icons_inner_widget.ui" />
     <QtUic Include="icon_button.ui" />
@@ -128,7 +130,9 @@
     <ClInclude Include="everything_ipc.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="keyEvent.h" />
-    <ClInclude Include="WindowsHookEx.h" />
+    <ClInclude Include="WindowsHookMouseEx.h" />
+    <QtMoc Include="logger.h" />
+    <ClInclude Include="WindowsHookKeyEx.h" />
     <QtMoc Include="Search_line.h" />
     <QtMoc Include="search_content.h" />
     <QtMoc Include="icons_inner_widget.h" />

@@ -53,7 +53,7 @@ class StartQuickly {
     bool                    isEnd;        //控制 identify (识别） 线程在程序结束的时候结束循环
     std::mutex              mtx_identify;
 
-    WindowsHookEx* ptr_windows_hook; //键盘钩子指针
+    WindowsHookKeyEx* ptr_windows_hook; //键盘钩子指针
 
     void     set_key_event(const KeyEvent & key_event); //策略模式，将执行方法注册到键盘钩子之中
     KeyEvent getKeyEvent();
