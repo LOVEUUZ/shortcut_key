@@ -27,6 +27,7 @@ bool WindowsHookMouseEx::setFunc(const std::function<void()>& newFunc) {
 
 //注册钩子
 void WindowsHookMouseEx::installHook() {
+#ifdef NDEBUG		  //注意调试的时候尽量不编译，要不然鼠标一卡一卡的心烦
 	std::cout << "mouse hook install" << "\n";
 	if (!running) {
 		running = true;
@@ -46,10 +47,12 @@ void WindowsHookMouseEx::installHook() {
 			});
 		hookThread.detach();
 	}
+#endif
 }
 
 //卸载钩子
 void WindowsHookMouseEx::unInstallHook() {
+#ifdef NDEBUG
 	if (running) {
 		running = false;
 		if (hMouseHook != NULL) {
@@ -58,6 +61,7 @@ void WindowsHookMouseEx::unInstallHook() {
 			hMouseHook = NULL;
 		}
 	}
+#endif
 }
 
 //回调

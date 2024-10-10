@@ -115,7 +115,9 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 		else if (selectedAction == action_delete_icon) {
 			slot_delete_icon(id);
 		}
-		else if (selectedAction == action_config) {}
+		else if (selectedAction == action_config) {
+			slot_config_widget_open();
+		}
 	}
 
 
@@ -468,5 +470,15 @@ void Icons_inner_widget::slot_delete_icon(int id) {
 }
 
 
-//右键打开配置，还未用到
-void Icons_inner_widget::slot_config() {}
+//右键打开配置
+void Icons_inner_widget::slot_config_widget_open() {
+
+	Config_window* config_window = new Config_window(this);
+	config_window->show();
+}
+
+
+// void Icons_inner_widget::slot_config_widget_close() {
+// 	WindowsHookKeyEx::getWindowHook()->installHook();
+// 	WindowsHookMouseEx::getWindowHook()->installHook();
+// }

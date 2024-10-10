@@ -12,6 +12,7 @@
 #include "iconButton.h"
 #include "ui_icons_inner_widget.h"
 #include "config.h"
+#include "config_window.h"
 
 #include "json.hpp"
 
@@ -59,7 +60,10 @@ private:
 	QString         first_create_config();
 	void            init_config();
 
-	enum Config_operate { ADD, DEL, MOVE, MODIFY};
+  //配置界面
+	// QMainWindow* config_window;
+
+	enum Config_operate { ADD, DEL, MOVE, MODIFY };
 	bool modify_config(Config_operate opt, const Config& config);
 	bool modify_config(Config_operate opt);
 	int  findEmptyPosition(); //寻找新增可用位置
@@ -76,11 +80,15 @@ public:
 public slots:
 	void slot_showDashedBorder(bool is_moving);                 //拖拽的时候显示虚线和隐藏
 	void slot_move_modify_config(int new_index, int old_index); //拖动后修改配置
-	void slot_modify_config(const Config &config);
+	void slot_modify_config(const Config& config);
 
 	void slot_add_icon();          //右键添加icon
 	void slot_add_folder();        //右键添加文件夹
 	void slot_change_show_name(int id);        //修改显示名称
 	void slot_delete_icon(int id); //右键删除icon
-	void slot_config();            //右键打开配置，还未用到
+	void slot_config_widget_open();            //右键打开配置
+	// void slot_config_widget_close();            //关闭配置页面
+
+// signals:
+	// void sig_config_widget_close();            //关闭配置页面
 };

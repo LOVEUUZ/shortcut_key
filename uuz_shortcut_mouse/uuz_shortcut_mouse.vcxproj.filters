@@ -97,6 +97,9 @@
     <ClCompile Include="WindowsHookMouseEx.cpp">
       <Filter>Source Files\Component</Filter>
     </ClCompile>
+    <ClCompile Include="config_window.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp">
@@ -118,7 +121,7 @@
       <Filter>Header Files\Component</Filter>
     </ClInclude>
     <ClInclude Include="WindowsHookMouseEx.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -139,6 +142,12 @@
     </QtMoc>
     <QtMoc Include="logger.h">
       <Filter>Header Files\tools</Filter>
+    </QtMoc>
+    <QtMoc Include="config_window.h">
+      <Filter>Source Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="config_window.h">
+      <Filter>Header Files\window</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

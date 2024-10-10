@@ -1,10 +1,14 @@
 ﻿#include "mainwidget.h"
 
+using json = nlohmann::json;
 
 MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
 	// ui.setupUi(this);
 	setObjectName("mainWidget");
 	// setWindowFlags(Qt::FramelessWindowHint);
+
+
+	init_coordinate();
 
 	init_shortcut_key();
 
@@ -18,7 +22,9 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
 
 
 #ifdef NDEBUG
-	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);	  //置顶
+	//置顶 禁用最大最小化
+	this->setWindowFlags(
+		this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 #endif
 
 	// setStyleSheet("MainWidget{background-color: #b7b7b7;} ");
@@ -162,14 +168,21 @@ void MainWidget::setMouseEvent() {
 		auto mouse_coordinate = QCursor::pos();
 		// 获取窗口左上角的全局坐标
 		QPoint globalPos = mapToGlobal(QPoint(0, 0));
-		// 创建一个包含窗口大小的矩形
-		QRect globalRect = QRect(globalPos, size());
+		// 创建一个包含窗口大小的矩形，并向上扩展 45px(大概是windows自带的最上面那一条的高度)
+		QSize size_contain_top_edge_size = size();
+		size_contain_top_edge_size.setHeight(size_contain_top_edge_size.height() + 45);
+
+		// 调整窗口左上角的坐标
+		globalPos.setY(globalPos.y() - 45);
+
+		QRect globalRect(globalPos, size_contain_top_edge_size);
 
 		// 判断鼠标坐标是否在窗口的全局矩形内
 		if (!globalRect.contains(mouse_coordinate)) {
 			emit sig_move_focus(nullptr); // 如果不在窗口内，发出信号
 		}
 		};
+
 
 	windowsMouseHook->setFunc(func);
 
@@ -181,8 +194,8 @@ void MainWidget::setMouseEvent() {
 void MainWidget::showEvent(QShowEvent* event) {
 	windowsMouseHook->installHook(); //安装鼠标钩子
 
-	SetForegroundWindow((HWND)this->winId());			//通过windows api来让该程序先获得焦点，才能让子窗口获取焦点
-	search_line->setFocus();		//显示的时候强制获取焦点
+	SetForegroundWindow((HWND)this->winId()); //通过windows api来让该程序先获得焦点，才能让子窗口获取焦点
+	search_line->setFocus();                  //显示的时候强制获取焦点
 
 	QWidget::showEvent(event);
 }
@@ -190,9 +203,62 @@ void MainWidget::showEvent(QShowEvent* event) {
 void MainWidget::hideEvent(QHideEvent* event) {
 	windowsMouseHook->unInstallHook(); //卸载鼠标钩子
 
-	search_line->clear();		//清空搜索栏，并让界面重回图标界面
+	search_line->clear(); //清空搜索栏，并让界面重回图标界面
 
 	QWidget::hideEvent(event);
+}
+
+void MainWidget::moveEvent(QMoveEvent* event) {
+#ifdef _DEBUG
+	qDebug() << "移动窗口";
+#endif
+
+	coordinate = this->pos(); //别用mapToGlobal(this->pos())，可能会因为屏幕缩放之类的原因产生奇奇怪怪的偏移
+	json_config["coordinate"]["x"] = coordinate.x();
+	json_config["coordinate"]["y"] = coordinate.y();
+
+	QWidget::moveEvent(event);
+}
+
+void MainWidget::init_coordinate() {
+	file_path = QCoreApplication::applicationDirPath() + "/config/shortcut_mouse_config.json";
+	// 获取目录路径
+	QDir dir = QFileInfo(file_path).absoluteDir();
+	// 检查目录是否存在，如果不存在则创建它及其父文件夹
+	if (!dir.mkpath(".")) {
+		qWarning() << "Cannot create directory:" << dir.path();
+		return;
+	}
+
+	file_config = new QFile(file_path);
+	// 可读可写模式打开文件
+	file_config->open(QIODevice::ReadWrite | QIODevice::Text);
+
+	// 读取文件内容
+	file_config->seek(0);
+	qstr_config_content = file_config->readAll();
+	if (qstr_config_content.isEmpty()) return;
+
+	str_config_content = qstr_config_content.toStdString();
+	json_config = json::parse(str_config_content);
+	coordinate.setX(json_config["coordinate"]["x"].get<int>());
+	coordinate.setY(json_config["coordinate"]["y"].get<int>());
+	this->move(coordinate);
+
+	// 连接应用程序退出信号到保存坐标的槽函数
+	connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, [&]() {
+		file_config->resize(0); // 清空文件
+		file_config->seek(0);
+		QTextStream config_content(file_config);
+		qDebug() << QString::fromStdString(json_config.dump(4));
+		config_content << QString::fromStdString(json_config.dump(4));
+		}
+	);
+}
+
+void MainWidget::closeEvent(QCloseEvent* event) {
+	this->hide();
+	event->ignore(); // 忽略关闭事件，避免消息传递导致程序退出
 }
 
 //托盘用
@@ -209,6 +275,9 @@ void MainWidget::init_tray() {
 
 	// 设置托盘图标的上下文菜单
 	trayIcon.setContextMenu(&trayMenu);
+
+	//双击显示界面
+	connect(&trayIcon, &QSystemTrayIcon::activated, this, &MainWidget::slot_on_tray_icon_activated);
 
 	// 连接菜单项的信号和槽
 	connect(act_show, &QAction::triggered, [&]() {
@@ -233,16 +302,30 @@ void MainWidget::init_tray() {
 	trayIcon.show();
 }
 
-
-void MainWidget::slot_show_stackedWidget_index(const int index) const {
-	stacked_widget->setCurrentIndex(index);
-}
-
-void MainWidget::slot_move_focus(QWidget* widget) {
-	if (widget != nullptr) {
-		widget->setFocus();
+void MainWidget::slot_on_tray_icon_activated(QSystemTrayIcon::ActivationReason reason) {
+	if (reason == QSystemTrayIcon::DoubleClick) {
+		if (this->isHidden()) {
+			show();
+		}
+		else {
+			hide();
+		}
+		//
+		// raise();          // 确保窗口在其他窗口之上
+		// activateWindow(); // 激活窗口
+		}
 	}
-	else {
-		this->hide(); //隐藏主窗口
+
+
+	void MainWidget::slot_show_stackedWidget_index(const int index) const {
+		stacked_widget->setCurrentIndex(index);
 	}
-}
+
+	void MainWidget::slot_move_focus(QWidget * widget) {
+		if (widget != nullptr) {
+			widget->setFocus();
+		}
+		else {
+			this->hide(); //隐藏主窗口
+		}
+	}

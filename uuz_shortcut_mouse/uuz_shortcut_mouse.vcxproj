@@ -97,6 +97,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="config_window.cpp" />
     <ClCompile Include="keyEvent.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="search_content.cpp">
@@ -126,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <QtMoc Include="config_window.h" />
     <ClInclude Include="Everything.h" />
     <ClInclude Include="everything_ipc.h" />
     <ClInclude Include="json.hpp" />
