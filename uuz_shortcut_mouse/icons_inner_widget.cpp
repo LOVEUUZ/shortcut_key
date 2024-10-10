@@ -70,18 +70,20 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 				icon_button_size, icon_button_size);
 			if (coordinateRange.contains(localPos)) {
 
-#ifdef _DEBUG
-				qDebug() << "删除可用";
-#endif
-
 				// 包含在内，只要有一个包含在内就能退出循环了
 				action_delete_icon->setEnabled(true);
 				action_change_show_name->setEnabled(true); // 默认禁用
-				id = i;
+
+				id = vec_config[i].id;
+
 				break;
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	qDebug() << "id ==> " << id;
+#endif
 
 	//菜单样式
 	contextMenu.setStyleSheet(
@@ -319,6 +321,7 @@ void Icons_inner_widget::slot_move_modify_config(int new_index, int old_index) {
 
 void Icons_inner_widget::slot_modify_config(const Config& config_) {
 	qInfo() << "修改配置文件";
+
 	//先从保存区获取该按钮对象指针
 	auto it = map_index_button.find(config_.id);
 	if (it == map_index_button.end()) {
@@ -390,6 +393,8 @@ void Icons_inner_widget::slot_add_icon() {
 	init_button_connect(tmp_qb);
 
 	tmp_qb->setGeometry(vec_coordinate[index].first, vec_coordinate[index].second, icon_button_size, icon_button_size);
+	connect(tmp_qb, &IconButton::sig_buttonDragged, this, &Icons_inner_widget::slot_showDashedBorder);
+	connect(tmp_qb, &IconButton::sig_move_modify_config, this, &Icons_inner_widget::slot_move_modify_config);
 	tmp_qb->show();
 	map_index_button[index] = tmp_qb;
 	vec_iconButton.push_back(std::move(tmp_qb)); // 将按钮添加到 vec_iconButton

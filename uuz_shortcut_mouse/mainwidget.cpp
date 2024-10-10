@@ -315,7 +315,7 @@ void MainWidget::init_coordinate() {
 		screens_coordinate[json_config["coordinate"][i]["screen_id"].get<int>()] = coordinate;
 	}
 
-	// 多屏幕检测
+	// 多屏幕检测，判断鼠标当前在哪，然后将
 	QPoint cursorPos = QCursor::pos();
 	QList<QScreen*> screens = QGuiApplication::screens();
 	for (int i = 0; i < screens.size(); ++i) {
