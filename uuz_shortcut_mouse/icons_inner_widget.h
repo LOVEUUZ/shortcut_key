@@ -13,9 +13,13 @@
 #include "ui_icons_inner_widget.h"
 #include "config.h"
 #include "config_window.h"
+#include "WindowsHookKeyEx.h"
+#include "WindowsHookMouseEx.h"
 
 #include "json.hpp"
 
+// class WindowsHookKeyEx;
+// class WindowsHookMouseEx;
 
 class Icons_inner_widget : public QWidget {
 	Q_OBJECT

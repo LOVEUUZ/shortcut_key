@@ -360,6 +360,10 @@ int Icons_inner_widget::findEmptyPosition() {
 
 //右键添加icon
 void Icons_inner_widget::slot_add_icon() {
+	//记得打开这些新窗口前卸载掉鼠标键盘钩子并在最后加回来
+	WindowsHookMouseEx::getWindowHook()->unInstallHook();
+	WindowsHookKeyEx::getWindowHook()->unInstallHook();
+
 	QString fileName = QFileDialog::getOpenFileName(this, tr("选择文件"), "", tr("所有文件 (*)"));
 	if (fileName.isEmpty()) return;
 	//从索引1开始遍历，直到找到空位索引在进行添加
@@ -394,10 +398,17 @@ void Icons_inner_widget::slot_add_icon() {
 	//更新配置文件,回写进配置文件
 	modify_config(ADD, config);
 	qInfo() << "新增成功";
+
+	WindowsHookMouseEx::getWindowHook()->installHook();
+	WindowsHookKeyEx::getWindowHook()->installHook();
 }
 
 //新增文件夹
 void Icons_inner_widget::slot_add_folder() {
+  //记得打开这些新窗口前卸载掉鼠标键盘钩子并在最后加回来
+	WindowsHookMouseEx::getWindowHook()->unInstallHook();
+	WindowsHookKeyEx::getWindowHook()->unInstallHook();
+
 	QString fileName = QFileDialog::getExistingDirectory(this, tr("选择文件夹"),
 		QString(QStandardPaths::writableLocation(
 			QStandardPaths::HomeLocation)), //初始路径文档？好像是这个
@@ -434,6 +445,9 @@ void Icons_inner_widget::slot_add_folder() {
 	//更新配置文件,回写进配置文件
 	modify_config(ADD, config);
 	qInfo() << "新增成功";
+
+	WindowsHookMouseEx::getWindowHook()->installHook();
+	WindowsHookKeyEx::getWindowHook()->installHook();
 }
 
 //修改显示名称
@@ -472,7 +486,6 @@ void Icons_inner_widget::slot_delete_icon(int id) {
 
 //右键打开配置
 void Icons_inner_widget::slot_config_widget_open() {
-
 	Config_window* config_window = new Config_window(this);
 	config_window->show();
 }

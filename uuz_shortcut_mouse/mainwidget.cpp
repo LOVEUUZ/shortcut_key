@@ -138,6 +138,9 @@ void MainWidget::init_shortcut_key() {
 void MainWidget::setKeyEvent() {
 	//注册给钩子那边调用的函数
 	std::function<void(KeyEvent)> func = [&](const KeyEvent& event) {
+#ifdef _DEBUG
+		std::cout << event.key << "\n";
+#endif
 		if ((event.key == 162 && event.isPressed) || (event.key == 163 && event.isPressed)) {
 			//左右的ctrl
 			ctrlPressTimer->start();
@@ -151,6 +154,13 @@ void MainWidget::setKeyEvent() {
 				}
 				else hide();
 			}
+		}
+		//显示状态的时候单次按下 esc按键 则隐藏
+		else if (event.key == 27) {
+			if (!this->isHidden()) {
+				hide();
+			}
+
 		}
 		};
 
@@ -192,6 +202,16 @@ void MainWidget::setMouseEvent() {
 }
 
 void MainWidget::showEvent(QShowEvent* event) {
+	//判断鼠标当前在哪一个屏幕上，然后显示窗口显示在该屏幕记录的坐标
+	QPoint cursorPos = QCursor::pos();
+	QList<QScreen*> screens = QGuiApplication::screens();
+	for (int i = 0; i < screens.size(); ++i) {
+		QScreen* screen = screens[i];
+		if (screen->geometry().contains(cursorPos)) {
+			this->move(screens_coordinate[i]);
+		}
+	}
+
 	windowsMouseHook->installHook(); //安装鼠标钩子
 
 	SetForegroundWindow((HWND)this->winId()); //通过windows api来让该程序先获得焦点，才能让子窗口获取焦点
@@ -213,12 +233,57 @@ void MainWidget::moveEvent(QMoveEvent* event) {
 	qDebug() << "移动窗口";
 #endif
 
-	coordinate = this->pos(); //别用mapToGlobal(this->pos())，可能会因为屏幕缩放之类的原因产生奇奇怪怪的偏移
-	json_config["coordinate"]["x"] = coordinate.x();
-	json_config["coordinate"]["y"] = coordinate.y();
+	// 多屏幕检测
+	QPoint cursorPos = QCursor::pos();
+	// int index = -1;
+	QList<QScreen*> screens = QGuiApplication::screens();
+	for (int i = 0; i < screens.size(); ++i) {
+		QScreen* screen = screens[i];
+		if (screen->geometry().contains(cursorPos)) {
+			// qDebug() << "当前在屏幕 ==> " << i;
 
-	QWidget::moveEvent(event);
+			QPoint         coordinate;
+
+	  //判断当前屏幕是否记录了坐标，没有则添加新坐标并更新json
+			auto it = screens_coordinate.find(i);
+			if (it == screens_coordinate.end()) {
+				coordinate.setX((screen->size().width()) / 2 - (this->size().width() / 2));
+				coordinate.setY((screen->size().height()) / 2 - (this->size().height() / 2));
+				screens_coordinate[i] = coordinate;
+				json_config["coordinate"][i]["screen_id"] = i;
+				json_config["coordinate"][i]["x"] = coordinate.x();
+				json_config["coordinate"][i]["y"] = coordinate.y();
+			}
+
+			coordinate = this->pos();
+			screens_coordinate[json_config["coordinate"][i]["screen_id"].get<int>()] = coordinate;
+
+			json_config["coordinate"][i]["x"] = coordinate.x();
+			json_config["coordinate"][i]["y"] = coordinate.y();
+
+#ifdef _DEBUG
+			qDebug() << "coordinate （" << coordinate.x()
+				<< "," << coordinate.y() << ")";
+
+			qDebug() << "json （" << json_config["coordinate"][i]["x"].get<int>()
+				<< "," << json_config["coordinate"][i]["y"].get<int>() << ")";
+
+			qDebug() << "";
+#endif
+
+			break;
+		}
+	}
+
+
+	// 写入文件
+	file_config->resize(0); // 清空文件
+	QTextStream config_content(file_config);
+	config_content << QString::fromStdString(json_config.dump(4));
+
+	QWidget::moveEvent(event); // 调用基类的 moveEvent
 }
+
 
 void MainWidget::init_coordinate() {
 	file_path = QCoreApplication::applicationDirPath() + "/config/shortcut_mouse_config.json";
@@ -236,24 +301,43 @@ void MainWidget::init_coordinate() {
 
 	// 读取文件内容
 	file_config->seek(0);
-	qstr_config_content = file_config->readAll();
+	QString qstr_config_content = file_config->readAll();
 	if (qstr_config_content.isEmpty()) return;
 
-	str_config_content = qstr_config_content.toStdString();
+
+	std::string str_config_content = qstr_config_content.toStdString();
 	json_config = json::parse(str_config_content);
-	coordinate.setX(json_config["coordinate"]["x"].get<int>());
-	coordinate.setY(json_config["coordinate"]["y"].get<int>());
-	this->move(coordinate);
+
+	for (int i = 0; i < json_config["coordinate"].size(); ++i) {
+		QPoint         coordinate;
+		coordinate.setX(json_config["coordinate"][i]["x"].get<int>());
+		coordinate.setY(json_config["coordinate"][i]["y"].get<int>());
+		screens_coordinate[json_config["coordinate"][i]["screen_id"].get<int>()] = coordinate;
+	}
+
+	// 多屏幕检测
+	QPoint cursorPos = QCursor::pos();
+	QList<QScreen*> screens = QGuiApplication::screens();
+	for (int i = 0; i < screens.size(); ++i) {
+		QScreen* screen = screens[i];
+		if (screen->geometry().contains(cursorPos)) {
+			// qDebug() << "当前在屏幕 ==> " << i;
+			this->move(screens_coordinate[i]);
+			break;
+		}
+	}
+
+
 
 	// 连接应用程序退出信号到保存坐标的槽函数
-	connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, [&]() {
-		file_config->resize(0); // 清空文件
-		file_config->seek(0);
-		QTextStream config_content(file_config);
-		qDebug() << QString::fromStdString(json_config.dump(4));
-		config_content << QString::fromStdString(json_config.dump(4));
-		}
-	);
+	// connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, [&]() {
+		// file_config->resize(0); // 清空文件
+		// file_config->seek(0);
+		// QTextStream config_content(file_config);
+		// qDebug() << QString::fromStdString(json_config.dump(4));
+		// config_content << QString::fromStdString(json_config.dump(4));
+		// }
+	// );
 }
 
 void MainWidget::closeEvent(QCloseEvent* event) {
@@ -313,19 +397,19 @@ void MainWidget::slot_on_tray_icon_activated(QSystemTrayIcon::ActivationReason r
 		//
 		// raise();          // 确保窗口在其他窗口之上
 		// activateWindow(); // 激活窗口
-		}
 	}
+}
 
 
-	void MainWidget::slot_show_stackedWidget_index(const int index) const {
-		stacked_widget->setCurrentIndex(index);
-	}
+void MainWidget::slot_show_stackedWidget_index(const int index) const {
+	stacked_widget->setCurrentIndex(index);
+}
 
-	void MainWidget::slot_move_focus(QWidget * widget) {
-		if (widget != nullptr) {
-			widget->setFocus();
-		}
-		else {
-			this->hide(); //隐藏主窗口
-		}
+void MainWidget::slot_move_focus(QWidget* widget) {
+	if (widget != nullptr) {
+		widget->setFocus();
 	}
+	else {
+		this->hide(); //隐藏主窗口
+	}
+}
