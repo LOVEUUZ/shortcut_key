@@ -55,7 +55,9 @@ void IconButton::init_icon(const QString& filePath) {
 	// 设置图标和样式
 	setIcon(m_icon);
 	setIconSize(QSize(iconSize, iconSize));
+#ifdef _DEBUG
 	qDebug() << "名字 ==》 " << QString::fromUtf8(config.fileName);
+#endif
 	setText(QString::fromUtf8(config.showName));
 	setToolButtonStyle(Qt::ToolButtonTextUnderIcon); // 图标在文字上方
 	setStyleSheet("QToolButton { background-color: #b7b7b7; border: 1px solid #888; border-radius: 5px; }");
@@ -93,7 +95,14 @@ void IconButton::mouseReleaseEvent(QMouseEvent* event) {
 
 		  //移动完成，通知父窗口修改配置文件
 				emit sig_move_modify_config(closestIndex, ID);
+
+#ifdef _DEBUG
+				qDebug() << "closestIndex ==> " << closestIndex << "   old_index ==> " << ID;
+#endif
+
+		    //记得及时更新自身的配置，特别的移动后需要修改索引id
 				ID = closestIndex;
+				config.id = ID;
 			}
 			else move(originalPos);
 		}

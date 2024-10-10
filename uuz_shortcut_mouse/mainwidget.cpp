@@ -214,8 +214,8 @@ void MainWidget::showEvent(QShowEvent* event) {
 
 	windowsMouseHook->installHook(); //安装鼠标钩子
 
-	SetForegroundWindow((HWND)this->winId()); //通过windows api来让该程序先获得焦点，才能让子窗口获取焦点
-	search_line->setFocus();                  //显示的时候强制获取焦点
+	//windows api，强制输入框获取焦点，参考：https://learn.microsoft.com/zh-cn/windows/win32/api/winuser/nf-winuser-setfocus
+	SetFocus((HWND)this->search_line->winId());		 
 
 	QWidget::showEvent(event);
 }
@@ -315,7 +315,7 @@ void MainWidget::init_coordinate() {
 		screens_coordinate[json_config["coordinate"][i]["screen_id"].get<int>()] = coordinate;
 	}
 
-	// 多屏幕检测
+	// 多屏幕检测，判断鼠标当前在哪，然后将
 	QPoint cursorPos = QCursor::pos();
 	QList<QScreen*> screens = QGuiApplication::screens();
 	for (int i = 0; i < screens.size(); ++i) {
