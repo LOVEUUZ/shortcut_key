@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	// 设置全局应用程序图标
 	QApplication::setWindowIcon(QIcon(":/res/Resource/uuz_logo.ico"));
 
-#ifdef _RELEASE
+#ifdef NDEBUG
 	// 设置日志保留天数
 	Logger::getLogger().set_retention_days(7);
 	// // 安装自定义消息处理程序

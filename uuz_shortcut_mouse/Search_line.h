@@ -21,4 +21,5 @@ private:
 
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
+
 };

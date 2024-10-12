@@ -47,6 +47,7 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 	QMenu contextMenu(this);
 
 	// 添加菜单项
+	QAction* action_open_icon_path = contextMenu.addAction(tr("打开路径"));
 	QAction* action_add_icon = contextMenu.addAction(tr("新增文件"));
 	QAction* action_add_folder = contextMenu.addAction(tr("新增文件夹"));
 	QAction* action_change_show_name = contextMenu.addAction(tr("修改名称"));
@@ -56,8 +57,9 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 	//用来判断删除是否禁用
 	int id = -1;
 	{
-		action_delete_icon->setEnabled(false);      // 默认禁用
-		action_change_show_name->setEnabled(false); // 默认禁用
+		action_open_icon_path->setEnabled(false); // 默认禁用
+		action_delete_icon->setEnabled(false);
+		action_change_show_name->setEnabled(false);
 		// 根据鼠标当前相对于该窗口的坐标偏移，可以判断是否在某个格子内，然后判断该格子当前是否有映射
 		QPoint localPos = this->mapFromGlobal(QCursor::pos());
 
@@ -71,6 +73,7 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 			if (coordinateRange.contains(localPos)) {
 
 				// 包含在内，只要有一个包含在内就能退出循环了
+				action_open_icon_path->setEnabled(true);
 				action_delete_icon->setEnabled(true);
 				action_change_show_name->setEnabled(true); // 默认禁用
 
@@ -105,6 +108,9 @@ void Icons_inner_widget::contextMenuEvent(QContextMenuEvent* event) {
 
 	// 执行菜单并处理选择
 	if (QAction* selectedAction = contextMenu.exec(event->globalPos())) {
+		if (selectedAction == action_open_icon_path) {
+			slot_open_icon_path(id);
+		}
 		if (selectedAction == action_add_icon) {
 			slot_add_icon();
 		}
@@ -348,6 +354,24 @@ void Icons_inner_widget::slot_modify_config(const Config& config_) {
 
 }
 
+void Icons_inner_widget::slot_open_icon_path(int id) {
+	auto ptr_icon_button = map_index_button.find(id);
+	if (ptr_icon_button != map_index_button.end()) {
+		auto btn = ptr_icon_button.value();
+
+		QFileInfo fileInfo(btn->getFilePath());
+		if (fileInfo.exists()) {
+			// 调用Windows资源管理器打开文件夹
+			QStringList args;
+			args << "/select," << QDir::toNativeSeparators(btn->getFilePath());
+			QProcess::startDetached("explorer", args);
+		}
+		else {
+			qWarning() << "路径不存在";
+		}
+	}
+}
+
 //寻找新增可用位置
 int Icons_inner_widget::findEmptyPosition() {
 	for (int index = 0; index < SUM; ++index) {
@@ -410,7 +434,7 @@ void Icons_inner_widget::slot_add_icon() {
 
 //新增文件夹
 void Icons_inner_widget::slot_add_folder() {
-  //记得打开这些新窗口前卸载掉鼠标键盘钩子并在最后加回来
+	//记得打开这些新窗口前卸载掉鼠标键盘钩子并在最后加回来
 	WindowsHookMouseEx::getWindowHook()->unInstallHook();
 	WindowsHookKeyEx::getWindowHook()->unInstallHook();
 

@@ -76,13 +76,7 @@
     <ClCompile Include="icons_inner_widget.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
-    <ClCompile Include="search_content.cpp">
-      <Filter>Header Files\window</Filter>
-    </ClCompile>
     <ClCompile Include="search_line.cpp">
-      <Filter>Source Files\window</Filter>
-    </ClCompile>
-    <ClCompile Include="search_content.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
     <ClCompile Include="WindowsHookKeyEx.cpp">
@@ -98,6 +92,12 @@
       <Filter>Source Files\Component</Filter>
     </ClCompile>
     <ClCompile Include="config_window.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="search_content.cpp">
+      <Filter>Header Files\window</Filter>
+    </ClCompile>
+    <ClCompile Include="search_content.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
   </ItemGroup>

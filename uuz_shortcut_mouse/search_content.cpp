@@ -6,7 +6,7 @@ class MainWidget;
 
 Search_content::Search_content(QWidget* parent)
 	: QTableWidget(parent), isSearching(false), searchThread(nullptr),
-	max_results(1500), is_clear(false) {
+	max_results(3000), is_clear(false) {
 	// 初始化其他配置
 	file_filter_path = QCoreApplication::applicationDirPath() + "/config/config_filter_path.txt";
 	file_filter_suffix = QCoreApplication::applicationDirPath() + "/config/config_filter_suffix.txt";
@@ -112,6 +112,12 @@ void Search_content::keyPressEvent(QKeyEvent* event) {
 			mainWidget->sig_move_focus(mainWidget->search_line);
 		}
 	}
+
+  //回车，小键盘的回车，空格
+  if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return || event->key() == Qt::Key_Space) {
+		  emit itemDoubleClicked(currentItem());
+  }
+
 	QTableWidget::keyPressEvent(event);
 }
 

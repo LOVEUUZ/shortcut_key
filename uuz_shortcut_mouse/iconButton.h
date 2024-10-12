@@ -28,6 +28,8 @@ public:
 
 	int ID;
 
+	inline QString getFilePath() { return filePath; }
+
 protected:
 	void mousePressEvent(QMouseEvent* event) override;
 	void mouseReleaseEvent(QMouseEvent* event) override;
@@ -37,7 +39,7 @@ protected:
 
 private:
 	void        init_icon(const QString& filePath);
-  void openFile(const QString& filePath);
+	void openFile(const QString& filePath);
 	void        updateIcon(const QString& filePath);
 	int         calculateClosestIndex(const QPoint& pos);
 
