@@ -164,18 +164,32 @@ void IconButton::leaveEvent(QEvent* event) {
 
 void IconButton::openFile(const QString& filePath) {
 	QString filePath_tmp = QDir::toNativeSeparators(filePath); // 转为本地格式
-	QUrl    fileUrl = QUrl::fromLocalFile(filePath_tmp);  // 转为url
-	QDesktopServices::openUrl(fileUrl);                        // 使用该函数可以打开exe，也能打开jpg，txt等文件
+	QFileInfo fileInfo(filePath_tmp);
+	QString directory = fileInfo.absolutePath();
+
+	// 保存当前工作目录
+	QString currentDir = QDir::currentPath();
+
+	// 改变当前工作目录（有些汉化组封包的gal就不行，必须要切过去才能运行，要不然会提示各种找不到）
+	QDir::setCurrent(directory);
+
+	// 打开文件/文件夹
+	QUrl fileUrl = QUrl::fromLocalFile(filePath_tmp);  // 转为url
+	QDesktopServices::openUrl(fileUrl);                // 使用该函数可以打开exe，也能打开jpg，txt等文件
 
 	qInfo() << "Starting process:" << filePath_tmp;
 
-	//主动失去焦点，隐藏主窗口
-	QWidget* widget_ = this->parentWidget()->parentWidget()->parentWidget();	  //this->icons_inner_widget->stacked_widget->MainWidget
+	// 恢复原来的工作目录
+	QDir::setCurrent(currentDir);
+
+	// 主动失去焦点，隐藏主窗口
+	QWidget* widget_ = this->parentWidget()->parentWidget()->parentWidget(); // this->icons_inner_widget->stacked_widget->MainWidget
 	MainWidget* mainWidget = qobject_cast<MainWidget*>(widget_);
 	if (mainWidget != nullptr) {
 		emit mainWidget->sig_move_focus(nullptr);
 	}
 }
+
 
 
 // 计算最近的索引
