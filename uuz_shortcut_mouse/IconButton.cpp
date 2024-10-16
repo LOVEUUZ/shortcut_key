@@ -214,7 +214,7 @@ void IconButton::slot_changeShowName() {
 		changeShowNameEdit = new QLineEdit(this);
 		connect(changeShowNameEdit, &QLineEdit::editingFinished, this, [&]() {
 			QString newShowName = changeShowNameEdit->text();
-			qDebug() << "修改后的名称为 >> " << newShowName;
+			qInfo() << "修改后的名称为 >> " << newShowName;
 			setShowName(newShowName);
 			setText(newShowName); // 更新按钮显示的文本
 			changeShowNameEdit->hide();

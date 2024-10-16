@@ -1,4 +1,4 @@
-#include "startQuickly.h"
+﻿#include "startQuickly.h"
 
 #include <iostream>
 #include <set>
@@ -283,6 +283,9 @@ void StartQuickly::identify() {
               //3.5.2 正式打开指定路径
               qInfo() << "alt 打开程序";
               std::string path = glob_json_[key_index]["path"].get<std::string>();
+
+
+
               startProcess(path);
             }
           }
@@ -333,55 +336,67 @@ void StartQuickly::startProcess(const std::string & path) {
   }
 
   //qt的函数
-  // {
-  //   QString filePath = QDir::toNativeSeparators(QString::fromStdString(path)); // 转为本地格式，避免中文路径无法启动
-  //   QUrl    fileUrl  = QUrl::fromLocalFile(filePath);                          //转为url方便启动
-  //   QDesktopServices::openUrl(fileUrl);                                        //使用该函数可以打开exe，也能打开jpg，txt等文件，更适用这里
-  //   QProcess process;
-  //   QProcess::startDetached(filePath);
-  // }
+  {
+    QString filePath = QDir::toNativeSeparators(QString::fromStdString(path)); // 转为本地格式，避免中文路径无法启动
+
+    QFileInfo fileInfo(filePath);
+    QString directory = fileInfo.absolutePath();
+
+    // 保存当前工作目录
+    QString currentDir = QDir::currentPath();
+    // 改变当前工作目录（有些汉化组封包的gal就不行，必须要切过去才能运行，要不然会提示各种找不到）
+    QDir::setCurrent(directory);
+
+    QUrl    fileUrl = QUrl::fromLocalFile(filePath);                          //转为url方便启动
+    QDesktopServices::openUrl(fileUrl);                                        //使用该函数可以打开exe，也能打开jpg，txt等文件，更适用这里
+    QProcess process;
+    QProcess::startDetached(filePath);
+
+    // 恢复原来的工作目录
+    QDir::setCurrent(currentDir);
+  }
 
 
   // (windows的函数)
   // 转换路径字符串为宽字符串
   // 将 UTF-8 编码的字符串转换为 UTF-16 编码的 LPCWSTR
-  {
-    int  size_needed = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, NULL, 0);
-    auto wpath       = new wchar_t[size_needed];
-    MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wpath, size_needed);
-
-    // 检查路径是否存在
-    if (!PathFileExists(wpath)) {
-      std::cerr << "Path does not exist: " << path << std::endl;
-      return;
-    }
-
-    // 获取文件属性
-    DWORD attributes = GetFileAttributes(wpath);
-    if (attributes == INVALID_FILE_ATTRIBUTES) {
-      std::cerr << "Could not get attributes for path: " << path << std::endl;
-      return;
-    }
-
-    // 检查路径是否为文件夹
-    if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
-      // 打开文件夹
-      ShellExecute(NULL, L"open", wpath, NULL, NULL, SW_SHOWDEFAULT);
-    }
-    else {
-      // 获取文件扩展名
-      std::wstring extension = PathFindExtension(wpath);
-
-      // 如果是 .exe 文件，直接打开
-      if (_wcsicmp(extension.c_str(), L".exe") == 0) {
-        ShellExecute(NULL, NULL, wpath, NULL, NULL, SW_SHOWDEFAULT);
-      }
-      else {
-        // 否则，使用默认程序打开
-        ShellExecute(NULL, L"open", wpath, NULL, NULL, SW_SHOWDEFAULT);
-      }
-    }
-  }
+  // {
+  //   int  size_needed = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, NULL, 0);
+  //   auto wpath       = new wchar_t[size_needed];
+  //   MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wpath, size_needed);
+  //
+  //   // 检查路径是否存在
+  //   if (!PathFileExists(wpath)) {
+  //     std::cerr << "Path does not exist: " << path << std::endl;
+  //     return;
+  //   }
+  //
+  //   // 获取文件属性
+  //   DWORD attributes = GetFileAttributes(wpath);
+  //   if (attributes == INVALID_FILE_ATTRIBUTES) {
+  //     std::cerr << "Could not get attributes for path: " << path << std::endl;
+  //     return;
+  //   }
+  //
+  //   // 检查路径是否为文件夹
+  //   if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
+  //     // 打开文件夹
+  //     ShellExecute(NULL, L"open", wpath, NULL, NULL, SW_SHOWDEFAULT);
+  //   }
+  //   else {
+  //     // 获取文件扩展名
+  //     std::wstring extension = PathFindExtension(wpath);
+  //
+  //     // 如果是 .exe 文件，直接打开
+  //     if (_wcsicmp(extension.c_str(), L".exe") == 0) {
+  //       ShellExecute(NULL, NULL, wpath, NULL, NULL, SW_SHOWDEFAULT);
+  //     }
+  //     else {
+  //       // 否则，使用默认程序打开
+  //       ShellExecute(NULL, L"open", wpath, NULL, NULL, SW_SHOWDEFAULT);
+  //     }
+  //   }
+  // }
 }
 
 //避免程序短时间内重复多次启动

@@ -169,5 +169,8 @@
     <QtUic Include="Search_line.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="config_window.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>
