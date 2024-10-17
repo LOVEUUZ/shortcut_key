@@ -22,17 +22,16 @@
 #include <QClipboard>
 
 
-
 class Search_content : public QTableWidget {
     Q_OBJECT
 
-public:
+  public:
     Search_content(QWidget* parent = nullptr);
     ~Search_content() override;
 
-private:
+  private:
     std::atomic<bool> isSearching;   // 跟踪搜索状态
-    QThread* searchThread;  // 异步搜索线程
+    QThread*          searchThread;  // 异步搜索线程
     QString           lastSearch;    // 上次搜索的文本
     int               max_results;   //默认1k5个搜索结果
     DWORD             total_results; //所有结果数量
@@ -41,9 +40,9 @@ private:
     // QMutex            mutex;
     std::atomic<bool> is_clear;
 
-    void performSearch(const QString& text);
-    void resetSearch(); // 重置状态
-    void handleErrors(DWORD errorCode, const QString& text);
+    void        performSearch(const QString & text);
+    void        resetSearch(); // 重置状态
+    static void handleErrors(DWORD errorCode, const QString & text);
 
     //布局相关
     void init_layout();
@@ -54,8 +53,8 @@ private:
     void        init_filter_config();
     QString     file_filter_path;
     QString     file_filter_suffix;
-    QFile* file_config_filter_path;
-    QFile* file_config_filter_suffix;
+    QFile*      file_config_filter_path;
+    QFile*      file_config_filter_suffix;
     QStringList filter_path_list;
     QStringList filter_suffix_list;
 
@@ -65,19 +64,19 @@ private:
     //右键点击事件（左键有信号，右键没有）
     void contextMenuEvent(QContextMenuEvent* event) override;
 
-signals:
+  signals:
     void sig_show(bool is_show);
-    void sig_addItem(const QStringList& path_list);
+    void sig_addItem(const QStringList & path_list);
 
-public slots:
-    void slot_text_change(const QString& text);
+  public slots:
+    void slot_textChange(const QString & text);
 
-private slots:
-    void slot_addItem(const QStringList& path_list);
-    void slot_open_file(const QTableWidgetItem* item);
+  private slots:
+    void slot_addItem(const QStringList & path_list);
+    void slot_openFile(const QTableWidgetItem* item);
     // void slot_file_(const QListWidgetItem* item);
 
 
-protected:
+  protected:
     void keyPressEvent(QKeyEvent* event) override;
 };

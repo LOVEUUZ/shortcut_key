@@ -11,65 +11,66 @@
 
 #include "json.hpp"
 
-
-// #include "icons_inner_widget.h"
 class Icons_inner_widget; // 前向声明
 
 
-class IconButton : public QToolButton {
-	Q_OBJECT
+class icon_button : public QToolButton {
+    Q_OBJECT
 
-public:
-	IconButton(QWidget* parent, const Config config);
-	~IconButton();
+  public:
+    icon_button(QWidget* parent, Config config);
+    ~icon_button() override;
 
-	inline QString getShowName() { return showName; }
-	inline bool    setShowName(const QString& newName) { showName = newName; return true; }
+    QString getShowName() { return showName; }
 
-	int ID;
+    bool setShowName(const QString & newName) {
+      showName = newName;
+      return true;
+    }
 
-	inline QString getFilePath() { return filePath; }
+    int ID; //其实索引，按照格子位置来排的，0-31
 
-protected:
-	void mousePressEvent(QMouseEvent* event) override;
-	void mouseReleaseEvent(QMouseEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
-	void enterEvent(QEnterEvent* event) override;
-	void leaveEvent(QEvent* event) override;
+    QString getFilePath() { return filePath; }
 
-private:
-	void        init_icon(const QString& filePath);
-	void openFile(const QString& filePath);
-	void        updateIcon(const QString& filePath);
-	int         calculateClosestIndex(const QPoint& pos);
+  protected:
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
 
-	//父窗口中的内容
-	Icons_inner_widget* parentWidget_content;	  // 上级窗口
-	QVector<QPair<int, int>>* vec_coordinate;
-	QMap<int, IconButton*>* map_index_button;   // 存储按钮与索引的映射
+  private:
+    void init_icon(const QString & filePath);
+    void openFile(const QString & filePath);
+    void updateIcon(const QString & filePath);
+    int  calculateClosestIndex(const QPoint & pos);
 
-
-	QString     filePath;
-	QString     showName;
-	QIcon       m_icon;				// 文件图标
-	static int  iconSize;
-	static bool is_moving;    // 是否在移动
-	QPoint      dragStartPos; //移动坐标
-	QPoint      originalPos;  // 存储未被拖动前的位置
-
-	//配置相关
-	Config config;
-
-	QLineEdit* changeShowNameEdit;
-
-signals:
-	void sig_buttonDragged(bool is_moving);
-	void sig_move_modify_config(int new_index, int old_index);
-	void sig_modify_config(Config& config);		//修改配置文件，和上面的移动的修改配置文件其实重复了
-
-	void sig_changeShowName();
+    //父窗口中的内容
+    Icons_inner_widget*       parent_widget_content; // 上级窗口
+    QVector<QPair<int, int>>* vec_coordinate;
+    QMap<int, icon_button*>*  map_index_button; // 存储按钮与索引的映射
 
 
-public slots:
-	void slot_changeShowName();
+    QString     filePath;
+    QString     showName;
+    QIcon       m_icon; // 文件图标
+    static int  iconSize;
+    static bool is_moving;      // 是否在移动
+    QPoint      drag_start_pos; //移动坐标
+    QPoint      original_pos;   // 存储未被拖动前的位置
+
+    //配置相关
+    Config config;
+
+    QLineEdit* change_show_name_edit;
+
+  signals:
+    void sig_buttonDragged(bool is_moving);
+    void sig_moveModifyConfig(int new_index, int old_index);
+    void sig_modifyConfig(Config & config); //修改配置文件，和上面的移动的修改配置文件其实重复了
+
+    void sig_changeShowName();
+
+  public slots:
+    void slot_changeShowName();
 };

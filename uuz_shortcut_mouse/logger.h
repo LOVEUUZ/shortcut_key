@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QString>
 #include <QFile>
@@ -27,7 +27,7 @@ class Logger : public QObject {
 
   private:
     Logger();
-    ~Logger();
+    ~Logger() override;
 
     // 根据日期创建日志文件名称
     QString logFileNameForDate(const QDate & date) const;

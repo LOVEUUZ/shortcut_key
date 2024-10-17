@@ -7,19 +7,16 @@
 
 // class MainWidget;
 
-class Search_line : public QLineEdit
-{
-	Q_OBJECT
+class Search_line : public QLineEdit {
+    Q_OBJECT
 
-public:
-	Search_line(QWidget* parent = nullptr);
-	~Search_line();
+  public:
+    Search_line(QWidget* parent = nullptr);
+    ~Search_line() override;
 
-private:
-	// Ui::Search_lineClass ui;
+    // Ui::Search_lineClass ui;
 
 
-protected:
-	void keyPressEvent(QKeyEvent* event) override;
-
+  protected:
+    void keyPressEvent(QKeyEvent* event) override;
 };

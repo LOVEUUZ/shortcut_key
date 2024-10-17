@@ -1,11 +1,12 @@
 ﻿#pragma once
 
-
 #include <string>
 #include <thread>
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <QObject>
+#include <QDebug>
 #include <queue>
 
 #include <windows.h>
@@ -13,7 +14,7 @@
 #include "keyEvent.h"
 
 //核心，windows钩子
-class WindowsHookKeyEx {
+class WindowsHookKeyEx : public QObject {
   public:
     static WindowsHookKeyEx* ptr_windows_hook;
 
@@ -27,8 +28,8 @@ class WindowsHookKeyEx {
     bool setFunc(const std::function<void(KeyEvent)> & newFunc);
 
   private:
-    explicit WindowsHookKeyEx() = default;
-    ~WindowsHookKeyEx()         = default;
+    explicit WindowsHookKeyEx()  = default;
+    ~WindowsHookKeyEx() override = default;
 
     HHOOK             hook;
     MSG               msg;

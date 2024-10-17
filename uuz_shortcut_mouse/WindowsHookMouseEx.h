@@ -4,27 +4,29 @@
 #include <windows.h>
 #include <thread>
 #include <atomic>
+#include <QObject>
+#include <QDebug>
 
-class WindowsHookMouseEx {
-public:
-    static WindowsHookMouseEx* getWindowHook();   //单例
+class WindowsHookMouseEx : public QObject {
+  public:
+    static WindowsHookMouseEx* getWindowHook(); //单例
 
     // 策略模式，接受一个传进来的方法
-    bool setFunc(const std::function<void()>& newFunc);
+    bool setFunc(const std::function<void()> & newFunc);
 
-    void installHook();      //注册钩子
-    void unInstallHook();   //卸载钩子
+    void installHook();   //注册钩子
+    void unInstallHook(); //卸载钩子
 
     static LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam); //回调，在回调中使用注册进来的方法
 
-private:
+  private:
     WindowsHookMouseEx();
-    ~WindowsHookMouseEx();
+    ~WindowsHookMouseEx() override;
 
-    static HHOOK hMouseHook;
+    static HHOOK               hMouseHook;
     static WindowsHookMouseEx* windowsHookMouseEx;
 
     std::function<void()> func; // 存储当前接收的策略
-    std::thread hookThread;
-    std::atomic<bool> running;
+    std::thread           hookThread;
+    std::atomic<bool>     running;
 };

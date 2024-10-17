@@ -121,7 +121,7 @@
       <Filter>Header Files\Component</Filter>
     </ClInclude>
     <ClInclude Include="WindowsHookMouseEx.h">
-      <Filter>Header Files\window</Filter>
+      <Filter>Header Files\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,15 +15,15 @@ Search_content::Search_content(QWidget* parent)
 
 
 	connect(this, &Search_content::sig_addItem, this, &Search_content::slot_addItem);
-	connect(this, &Search_content::itemDoubleClicked, this, &Search_content::slot_open_file);
-	// connect(this, &Search_content::itemDoubleClicked, this, &Search_content::slot_open_file);
+	connect(this, &Search_content::itemDoubleClicked, this, &Search_content::slot_openFile);
+	// connect(this, &Search_content::itemDoubleClicked, this, &Search_content::slot_openFile);
 }
 
 Search_content::~Search_content() {
 	resetSearch();
 }
 
-//调整列宽
+/**调整列宽*/
 void Search_content::resizeEvent(QResizeEvent* event) {
 	int totalWidth = this->width();
 	int col1Width = totalWidth * 0.05; // 5% 宽度 ps: 有最小像素点限制，所以只能将就了
@@ -35,15 +35,15 @@ void Search_content::resizeEvent(QResizeEvent* event) {
 	QTableWidget::resizeEvent(event);
 }
 
-
-void Search_content::slot_text_change(const QString& text) {
+/**槽，搜索栏文本内容改变的时候触发*/
+void Search_content::slot_textChange(const QString& text) {
 	if (!Everything_IsDBLoaded()) {
-		qDebug() << "Everything数据库未加载";
+		qWarning() << "Everything数据库未加载";
 		return;
 	}
 
 	if (isSearching) {
-		qDebug() << "停止前一次搜索";
+		qInfo() << "停止前一次搜索";
 		resetSearch(); // 停止前一次搜索
 	}
 
@@ -61,8 +61,13 @@ void Search_content::slot_text_change(const QString& text) {
 	qDebug() << "开始新线程";
 }
 
-// 子线程发送搜索的结果信号,在主线程中添加，避免子线程中添加导致主线程卡顿
-//将每一次添加的个数设置为50个，避免在任务线程中执行clear的时候这里还在执行addItems，同时避免持有锁太久
+
+/**
+ * 子线程发送搜索的结果信号,在主线程中添加，避免子线程中添加导致主线程卡顿
+ * 将每一次添加的个数设置为50个，避免在任务线程中执行clear的时候这里还在执行addItems，同时避免持有锁太久
+ *
+ * @param path_list 搜索到的文件的路径集合，发送的信号会做分割，大概50个一组，避免阻塞ui线程过久
+ */
 void Search_content::slot_addItem(const QStringList& path_list) {
 	if (!path_list.isEmpty()) {
 		// QMutexLocker locker(&mutex);
@@ -92,8 +97,11 @@ void Search_content::slot_addItem(const QStringList& path_list) {
 }
 
 
-//双击打开对应文件
-void Search_content::slot_open_file(const QTableWidgetItem* item) {
+/**
+ * 双击打开对应文件
+ * @param item QTableWidget选中的一行
+ */
+void Search_content::slot_openFile(const QTableWidgetItem* item) {
 	int     row = item->row();
 	QString filePath_tmp = QDir::toNativeSeparators(this->item(row, 2)->text()); // 转为本地格式
 	QUrl    fileUrl = QUrl::fromLocalFile(filePath_tmp);                    // 转为url
@@ -101,15 +109,21 @@ void Search_content::slot_open_file(const QTableWidgetItem* item) {
 
 	qInfo() << "Starting process:" << filePath_tmp;
 
-	//todo 判断失去焦点后时候关闭该窗口
+	//隐藏窗口
+  auto main_widget = qobject_cast<MainWidget*>(this->parentWidget()->parentWidget());  //第一个是stacked_widget，第二个才是MainWidget
+  main_widget->hide();
 }
 
+/**
+  * 通过键盘快捷键打开文件
+  *	通过上下键切换搜索内容栏与搜索框的焦点
+ */
 void Search_content::keyPressEvent(QKeyEvent* event) {
 	if (event->key() == Qt::Key_Up && currentRow() == 0) {
 		clearFocus();
 		auto mainWidget = qobject_cast<MainWidget*>(this->parentWidget()->parentWidget()); //第一个是stacked_widget，第二个才是MainWidget
 		if (mainWidget != nullptr) {
-			mainWidget->sig_move_focus(mainWidget->search_line);
+			mainWidget->sig_moveFocus(mainWidget->search_line);
 		}
 	}
 
@@ -121,7 +135,7 @@ void Search_content::keyPressEvent(QKeyEvent* event) {
 	QTableWidget::keyPressEvent(event);
 }
 
-//右键点击事件
+/** 右键菜单*/
 void Search_content::contextMenuEvent(QContextMenuEvent* event) {
 	QTableWidgetItem* item = itemAt(event->pos());
 	if (item) {
@@ -199,7 +213,7 @@ void Search_content::contextMenuEvent(QContextMenuEvent* event) {
 }
 
 
-// 线程任务
+/** 线程任务*/
 void Search_content::performSearch(const QString& text) {
 	{
 		// QMutexLocker locker(&mutex);
@@ -219,7 +233,7 @@ void Search_content::performSearch(const QString& text) {
 	Everything_SetSort(EVERYTHING_SORT_DATE_MODIFIED_DESCENDING); //排序方式-修改日期降序
 	Everything_SetMatchCase(FALSE);                               // 无视大小写
 
-	qDebug() << "搜索内容 ==> " << text;
+	qInfo() << "搜索内容 ==> " << text;
 	Everything_SetSearchW(text.toStdWString().c_str());
 	Everything_QueryW(TRUE); // 等待查询完成
 
@@ -275,12 +289,12 @@ void Search_content::performSearch(const QString& text) {
 	Everything_CleanUp(); // 清理并释放资源
 }
 
-
+/** 清理线程任务，如果前一次的还在运行，则直接中断并释放everything的资源*/
 void Search_content::resetSearch() {
-	qDebug() << "清理线程开始";
+	qInfo() << "清理线程开始";
 
 	if (searchThread) {
-		qDebug() << "终止搜索线程";
+		qInfo() << "终止搜索线程";
 		searchThread->quit(); // 停止搜索线程
 		searchThread->wait(); // 等待线程结束
 		delete searchThread;  // 删除线程对象
@@ -292,20 +306,20 @@ void Search_content::resetSearch() {
 	Everything_Reset();   // 重置状态
 	Everything_CleanUp(); // 清理并释放资源
 
-	qDebug() << "清理线程结束";
+	qInfo() << "清理线程结束";
 }
 
-
+/** everything的异常处理*/
 void Search_content::handleErrors(DWORD errorCode, const QString& text) {
 	switch (errorCode) {
 	case EVERYTHING_ERROR_IPC:
-		qDebug() << "Everything client is not running.";
+		qCritical() << "Everything client is not running.";
 		break;
 	case EVERYTHING_ERROR_MEMORY:
-		qDebug() << "Out of memory.";
+		qFatal("everything Out of memory.");
 		break;
 	case EVERYTHING_ERROR_INVALIDCALL:
-		qDebug() << "Invalid call.";
+		qWarning() << "Invalid call.";
 		break;
 	default:
 		qInfo() << "No search results found:" << text;
@@ -313,10 +327,11 @@ void Search_content::handleErrors(DWORD errorCode, const QString& text) {
 	}
 }
 
+/** 初始化QTableWidget*/
 void Search_content::init_layout() {
 	this->setColumnCount(3);                                // 设置列数为3
-	this->setHorizontalHeaderLabels({ "类型", "文件名称", "全路径" }); // 设置列标题
-	// this->horizontalHeader()->setVisible(false);           // 隐藏水平标题
+	// this->setHorizontalHeaderLabels({ "类型", "文件名称", "全路径" }); // 设置列标题
+	this->horizontalHeader()->setVisible(false);           // 隐藏水平标题
 	this->verticalHeader()->setVisible(false);             // 隐藏垂直标题
 	this->setShowGrid(false);                              // 隐藏网格线
 	this->setStyleSheet("QTableWidget { border: none; }"); // 设置无边框
@@ -330,7 +345,7 @@ void Search_content::init_layout() {
 	this->setFont(font);                                   // 应用新的字体
 }
 
-//过滤配置文件的读取
+/**过滤配置文件的读取*/
 void Search_content::init_filter_config() {
 	// 获取目录路径
 	QDir dir = QFileInfo(file_filter_path).absoluteDir();
@@ -349,7 +364,7 @@ void Search_content::init_filter_config() {
 			qInfo() << "File created:" << file_filter_path;
 
 			QString userHomePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-			qDebug() << "当前用户路径：" << userHomePath;
+			qInfo() << "当前用户路径：" << userHomePath;
 
 			// 构建默认的排除条件
 			filter_path_list << userHomePath + "/AppData"
