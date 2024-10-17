@@ -29,7 +29,6 @@ Icons_inner_widget::~Icons_inner_widget() {
   file_config->close();
 }
 
-
 /**重绘，主要用于拖动的时候显示和隐藏虚线*/
 void Icons_inner_widget::paintEvent(QPaintEvent* event) {
   if (is_showDashedBorder) {
@@ -655,12 +654,6 @@ void Icons_inner_widget::slot_unInstallHook() {
 
 /**槽，右键菜单 打开设置界面*/
 void Icons_inner_widget::slot_configWidgetOpen() {
-  auto config_window = new Config_window();
+  auto config_window = new Config_window(); //传的是 Mainwidget
   config_window->show();
 }
-
-
-// void Icons_inner_widget::slot_config_widget_close() {
-// 	WindowsHookKeyEx::getWindowHook()->installHook();
-// 	WindowsHookMouseEx::getWindowHook()->installHook();
-// }
