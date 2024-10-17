@@ -35,8 +35,11 @@ class MainWidget : public QWidget {
     MainWidget(QWidget* parent = nullptr);
     ~MainWidget() override;
 
+    static MainWidget* get_mainWidget() { return main_widget_; }
+
   private:
     // Ui::MainWidgetClass ui;
+    static MainWidget* main_widget_;
 
     //主要模块  
     Search_line*        search_line;         //everything用搜索框
@@ -75,7 +78,10 @@ class MainWidget : public QWidget {
     QFile*            file_config;
     nlohmann::json    json_config;
     QMap<int, QPoint> screens_coordinate; //多屏幕坐标记录，和json冗余，但用起来方便
+  public:
+    nlohmann::json& get_jsonConfig() { return json_config; }
 
+  private:
     //重定义关闭按钮，改为隐藏
     void closeEvent(QCloseEvent* event) override;
 
@@ -84,12 +90,17 @@ class MainWidget : public QWidget {
     QMenu           trayMenu; //托盘菜单
     QSystemTrayIcon trayIcon; //托盘图标
 
+
   signals:
     void sig_moveFocus(QWidget*); //焦点移动
 
+    void sig_modifyConfig();
 
   private slots:
     void slot_showStackedWidgetIndex(int index) const;
     void slot_moveFocus(QWidget*); //焦点移动
     void slot_onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
+
+  public slots:
+    void slot_modifyConfig();
 };

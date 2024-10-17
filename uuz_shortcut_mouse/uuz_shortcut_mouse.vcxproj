@@ -110,6 +110,7 @@
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
     <ClCompile Include="search_line.cpp" />
+    <ClCompile Include="textedit.cpp" />
     <ClCompile Include="WindowsHookKeyEx.cpp" />
     <ClCompile Include="WindowsHookMouseEx.cpp" />
     <QtRcc Include="mainwidget.qrc" />
@@ -136,6 +137,7 @@
     <ClInclude Include="everything_ipc.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="keyEvent.h" />
+    <QtMoc Include="textedit.h" />
     <ClInclude Include="WindowsHookMouseEx.h" />
     <QtMoc Include="logger.h" />
     <ClInclude Include="WindowsHookKeyEx.h" />

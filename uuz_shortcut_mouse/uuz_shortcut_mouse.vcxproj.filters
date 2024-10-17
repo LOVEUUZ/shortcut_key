@@ -100,6 +100,9 @@
     <ClCompile Include="search_content.cpp">
       <Filter>Source Files\window</Filter>
     </ClCompile>
+    <ClCompile Include="textedit.cpp">
+      <Filter>Source Files\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp">
@@ -147,6 +150,12 @@
       <Filter>Source Files\window</Filter>
     </QtMoc>
     <QtMoc Include="config_window.h">
+      <Filter>Header Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="textedit.h">
+      <Filter>Source Files\window</Filter>
+    </QtMoc>
+    <QtMoc Include="textedit.h">
       <Filter>Header Files\window</Filter>
     </QtMoc>
   </ItemGroup>

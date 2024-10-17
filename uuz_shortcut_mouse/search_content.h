@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
+#include <QPair>
 // #include <QMutex>
 #include <QDesktopServices>
 #include <QUrl>
@@ -29,7 +30,11 @@ class Search_content : public QTableWidget {
     Search_content(QWidget* parent = nullptr);
     ~Search_content() override;
 
+    static Search_content* get_searchContentWidget() { return search_content_widget; }
+
   private:
+    static Search_content* search_content_widget;
+
     std::atomic<bool> isSearching;   // 跟踪搜索状态
     QThread*          searchThread;  // 异步搜索线程
     QString           lastSearch;    // 上次搜索的文本
@@ -50,17 +55,21 @@ class Search_content : public QTableWidget {
 
 
     //过滤条件
-    void        init_filter_config();
-    QString     file_filter_path;
-    QString     file_filter_suffix;
-    QFile*      file_config_filter_path;
-    QFile*      file_config_filter_suffix;
-    QStringList filter_path_list;
-    QStringList filter_suffix_list;
+    void               init_filter_config();
+    QString            file_filter_path;
+    QString            file_filter_suffix;
+    QFile*             file_config_filter_path;
+    QFile*             file_config_filter_suffix;
+    static QStringList filter_path_list;
+    static QStringList filter_suffix_list;
 
-    //todo 过滤配置文件的修改在主菜单的配置中进行
+    //过滤配置文件的获取
+  public:
+    static QPair<QStringList&, QStringList&> get_filter() {
+      return {filter_path_list, filter_suffix_list};
+    }
 
-
+  private:
     //右键点击事件（左键有信号，右键没有）
     void contextMenuEvent(QContextMenuEvent* event) override;
 
@@ -70,6 +79,7 @@ class Search_content : public QTableWidget {
 
   public slots:
     void slot_textChange(const QString & text);
+    void slot_configFilterModify();
 
   private slots:
     void slot_addItem(const QStringList & path_list);

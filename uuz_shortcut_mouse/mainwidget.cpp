@@ -1,12 +1,13 @@
 ﻿#include "mainwidget.h"
 
-using json = nlohmann::json;
+using json                           = nlohmann::json;
+MainWidget* MainWidget::main_widget_ = nullptr;
 
 MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
   // ui.setupUi(this);
   setObjectName("mainWidget");
   // setWindowFlags(Qt::FramelessWindowHint);
-
+  main_widget_ = this;
 
   init_coordinate();
 
@@ -28,6 +29,10 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
 #endif
 
   // setStyleSheet("MainWidget{background-color: #b7b7b7;} ");
+
+
+  //在这里设置一下日志天数，懒得创建新东西了
+  Logger::getLogger().set_retention_days(json_config["log_retain_day"].get<int>());
 }
 
 MainWidget::~MainWidget() {}
@@ -402,6 +407,13 @@ void MainWidget::slot_onTrayIconActivated(QSystemTrayIcon::ActivationReason reas
     // raise();          // 确保窗口在其他窗口之上
     // activateWindow(); // 激活窗口
   }
+}
+
+/**槽，主要是设置界面修改json触发这里*/
+void MainWidget::slot_modifyConfig() {
+  file_config->resize(0); // 清空文件
+  QTextStream config_content(file_config);
+  config_content << QString::fromStdString(json_config.dump(4));
 }
 
 
