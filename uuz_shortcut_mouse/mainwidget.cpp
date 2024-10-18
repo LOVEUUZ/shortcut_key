@@ -130,8 +130,11 @@ void MainWidget::init_shortcutKey() {
   ctrlPressTimer = new QTimer(this);
   ctrlPressTimer->setInterval(300); // 0.3秒
   ctrlPressTimer->setSingleShot(true);
+  ctrlPressCount   = 0;
+  ctrlReleaseCount = 0;
   connect(ctrlPressTimer, &QTimer::timeout, [&]() {
-    ctrlPressCount = 0;
+    ctrlPressCount   = 0;
+    ctrlReleaseCount = 0;
   });
 
   setKeyEvent();
@@ -145,13 +148,21 @@ void MainWidget::setKeyEvent() {
   //注册给钩子那边调用的函数
   std::function<void(KeyEvent)> func = [&](const KeyEvent & event) {
 #ifdef _DEBUG
-    std::cout << event.key << "\n";
+    std::cout << event.key << " - " << event.isPressed << "\n";
 #endif
+
+    //松开一次计数
+    if ((event.key == 162 && !event.isPressed) || (event.key == 163 && !event.isPressed)) {
+      ctrlReleaseCount++;
+      qDebug() << "释放计数 " << ctrlReleaseCount;
+      return;
+    }
+
     if ((event.key == 162 && event.isPressed) || (event.key == 163 && event.isPressed)) {
       //左右的ctrl
       ctrlPressTimer->start();
       ctrlPressCount++;
-      if (ctrlPressCount == 2) {
+      if (ctrlPressCount == 2 && ctrlReleaseCount == 1) {
         //双击唤醒/隐藏窗口
         if (isHidden()) {
           this->raise();

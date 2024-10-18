@@ -63,6 +63,7 @@ class MainWidget : public QWidget {
     void                init_shortcutKey();
     QTimer*             ctrlPressTimer;   //定时
     int                 ctrlPressCount;   //计数
+    int                 ctrlReleaseCount;   //计数
     WindowsHookKeyEx*   windowsKeyHookEx; //windows键盘钩子
     WindowsHookMouseEx* windowsMouseHook; //windows鼠标钩子
     void                setKeyEvent();    //注册键盘事件
