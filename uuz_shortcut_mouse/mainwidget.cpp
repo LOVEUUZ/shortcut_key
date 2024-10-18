@@ -145,7 +145,7 @@ void MainWidget::setKeyEvent() {
   //注册给钩子那边调用的函数
   std::function<void(KeyEvent)> func = [&](const KeyEvent & event) {
 #ifdef _DEBUG
-		std::cout << event.key << "\n";
+    std::cout << event.key << "\n";
 #endif
     if ((event.key == 162 && event.isPressed) || (event.key == 163 && event.isPressed)) {
       //左右的ctrl
@@ -202,7 +202,7 @@ void MainWidget::setMouseEvent() {
   windowsMouseHook->setFunc(func);
 
 #ifdef _DEBUG
-	windowsMouseHook->installHook(); //安装鼠标钩子。当窗口显示的时候安装，隐藏的时候卸载
+  windowsMouseHook->installHook(); //安装鼠标钩子。当窗口显示的时候安装，隐藏的时候卸载
 #endif
 }
 
@@ -235,7 +235,7 @@ void MainWidget::hideEvent(QHideEvent* event) {
 
 void MainWidget::moveEvent(QMoveEvent* event) {
 #ifdef _DEBUG
-	qDebug() << "移动窗口";
+  qDebug() << "移动窗口";
 #endif
 
   // 多屏幕检测
@@ -246,7 +246,7 @@ void MainWidget::moveEvent(QMoveEvent* event) {
     QScreen* screen = screens[i];
     if (screen->geometry().contains(cursorPos)) {
 #ifdef _DEBUG
-			qDebug() << "当前在屏幕 ==> " << i;
+      qDebug() << "当前在屏幕 ==> " << i;
 #endif
 
       QPoint coordinate;
@@ -269,13 +269,13 @@ void MainWidget::moveEvent(QMoveEvent* event) {
       json_config["coordinate"][i]["y"] = coordinate.y();
 
 #ifdef _DEBUG
-			qDebug() << "coordinate （" << coordinate.x()
-				<< "," << coordinate.y() << ")";
+      qDebug() << "coordinate （" << coordinate.x()
+        << "," << coordinate.y() << ")";
 
-			qDebug() << "json （" << json_config["coordinate"][i]["x"].get<int>()
-				<< "," << json_config["coordinate"][i]["y"].get<int>() << ")";
+      qDebug() << "json （" << json_config["coordinate"][i]["x"].get<int>()
+        << "," << json_config["coordinate"][i]["y"].get<int>() << ")";
 
-			qDebug() << "";
+      qDebug() << "";
 #endif
 
       break;
@@ -309,7 +309,13 @@ void MainWidget::init_coordinate() {
   // 读取文件内容
   file_config->seek(0);
   QString qstr_config_content = file_config->readAll();
-  if (qstr_config_content.isEmpty()) return;
+  if (qstr_config_content.isEmpty()) {
+    //添加日志的记录，避免读取保留天数的时候出错
+    json_config["log_retain_day"] = 7;
+    QTextStream text_stream(file_config);
+    text_stream << QString::fromStdString(json_config.dump(4));
+    return;
+  }
 
 
   std::string str_config_content = qstr_config_content.toStdString();
@@ -329,7 +335,7 @@ void MainWidget::init_coordinate() {
     QScreen* screen = screens[i];
     if (screen->geometry().contains(cursorPos)) {
 #ifdef _DEBUG
-			qDebug() << "当前在屏幕 ==> " << i;
+      qDebug() << "当前在屏幕 ==> " << i;
 #endif
 
       this->move(screens_coordinate[i]);
